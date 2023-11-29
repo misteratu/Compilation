@@ -3,7 +3,7 @@
 # Shared cache: disabled
 # Workspace root: /home/picard/Documents/GitHub/Compilation/sourceEtu
 # Auto-detected concurrency: 12
-$ /home/picard/.opam/4.11.0/bin/ocamlc.opt -config > /tmp/dune_4fc431_output
+$ /home/picard/.opam/4.11.0/bin/ocamlc.opt -config > /tmp/dune_0deb10_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -110,12 +110,15 @@ $ /home/picard/.opam/4.11.0/bin/ocamlc.opt -config > /tmp/dune_4fc431_output
 #      }
 #  }
 $ (cd _build/default && .ppx/423b3c0918a91461d11b9cd1259aca91/ppx.exe --cookie 'inline_tests="enabled"' --cookie 'library-name="rat"' -o passeTypeRat.pp.ml --impl passeTypeRat.ml -corrected-suffix .ppx-corrected -diff-cmd - -dump-ast)
-> File "passeTypeRat.ml", line 34, characters 91-94:
-> 34 |                                           | Int, Plus, Int -> AstType.Binaire (PlusInt ne1 ne2)
->                                                                                                 ^^^
-> Error: Syntax error: ')' expected
-> File "passeTypeRat.ml", line 34, characters 78-79:
-> 34 |                                           | Int, Plus, Int -> AstType.Binaire (PlusInt ne1 ne2)
->                                                                                    ^
->   This '(' might be unmatched
-[1]
+$ (cd _build/default && /home/picard/.opam/4.11.0/bin/ocamldep.opt -modules -impl passeTypeRat.pp.ml) > _build/default/.rat.objs/rat__PasseTypeRat.impl.d
+$ (cd _build/default && /home/picard/.opam/4.11.0/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I .rat.objs/byte -I /home/picard/.opam/4.11.0/lib/base -I /home/picard/.opam/4.11.0/lib/base/base_internalhash_types -I /home/picard/.opam/4.11.0/lib/base/caml -I /home/picard/.opam/4.11.0/lib/base/shadow_stdlib -I /home/picard/.opam/4.11.0/lib/jane-street-headers -I /home/picard/.opam/4.11.0/lib/ppx_compare/runtime-lib -I /home/picard/.opam/4.11.0/lib/ppx_enumerate/runtime-lib -I /home/picard/.opam/4.11.0/lib/ppx_expect/collector -I /home/picard/.opam/4.11.0/lib/ppx_expect/common -I /home/picard/.opam/4.11.0/lib/ppx_expect/config -I /home/picard/.opam/4.11.0/lib/ppx_expect/config_types -I /home/picard/.opam/4.11.0/lib/ppx_hash/runtime-lib -I /home/picard/.opam/4.11.0/lib/ppx_here/runtime-lib -I /home/picard/.opam/4.11.0/lib/ppx_inline_test/config -I /home/picard/.opam/4.11.0/lib/ppx_inline_test/runtime-lib -I /home/picard/.opam/4.11.0/lib/ppx_sexp_conv/runtime-lib -I /home/picard/.opam/4.11.0/lib/sexplib0 -I /home/picard/.opam/4.11.0/lib/time_now -no-alias-deps -opaque -open Rat -o .rat.objs/byte/rat__PasseTypeRat.cmo -c -impl passeTypeRat.pp.ml)
+> File "passeTypeRat.ml", line 76, characters 4-5:
+> 76 |   | _ -> failwith "Erreur dans le match"
+>          ^
+> Warning 11: this match case is unused.
+> File "passeTypeRat.ml", line 157, characters 21-41:
+> 157 |   let nf = List.map (analyse_tds_fonction tds) fonctions in
+>                            ^^^^^^^^^^^^^^^^^^^^
+> Error: Unbound value analyse_tds_fonction
+> Hint: Did you mean analyse_type_fonction?
+[2]

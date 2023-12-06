@@ -32,7 +32,6 @@ let rec analyse_tds_expression tds e =
   | AstSyntax.Entier (i) -> AstTds.Entier (i)
   | AstSyntax.Unaire (op, exp) -> AstTds.Unaire(op, analyse_tds_expression tds exp)
   | AstSyntax.Binaire (op, exp1, exp2) -> AstTds.Binaire(op, analyse_tds_expression tds exp1, analyse_tds_expression tds exp2)
-  | _ -> failwith "Erreur dans le match"
 
 (* analyse_tds_instruction : tds -> info_ast option -> AstSyntax.instruction -> AstTds.instruction *)
 (* Paramètre tds : la table des symboles courante *)
@@ -161,7 +160,7 @@ and analyse_tds_bloc tds oia li =
 
    let analyse_tds_parametre tds (t,n) =
     match chercherLocalement tds n with 
-    | Some a -> raise (DoubleDeclaration n)
+    | Some _ -> raise (DoubleDeclaration n)
     | None -> let pointeur = (info_to_info_ast (InfoVar (n, Undefined, 0, ""))) in
       ajouter tds n pointeur;
       (t, pointeur)
@@ -175,12 +174,12 @@ en une fonction de type AstTds.fonction *)
 let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li))  = 
   let filletds = creerTDSFille maintds in
   match chercherGlobalement maintds n with
-  | None -> let infof_ast = (info_to_info_ast(InfoFun(n, t, (List.map(fun (a,b) -> a) lp)))) in
+  | None -> let infof_ast = (info_to_info_ast(InfoFun(n, t, (List.map(fun (a,_) -> a) lp)))) in
                 ajouter maintds n infof_ast;
                 let lparam = List.map (analyse_tds_parametre filletds) lp in 
                 let convertBloc = List.map (analyse_tds_instruction filletds (Some infof_ast)) li in 
             AstTds.Fonction(t, infof_ast, lparam,convertBloc)
-  | Some info -> raise (DoubleDeclaration n)
+  | Some _ -> raise (DoubleDeclaration n)
 
 
 (* analyser : AstSyntax.programme -> AstTds.programme *)

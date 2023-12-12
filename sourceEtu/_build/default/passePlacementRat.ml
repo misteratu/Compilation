@@ -43,10 +43,11 @@ let analyser_placement_fonction (AstType.Fonction(inf_fonc, inf_param, b)) =
     match l with
     | [] -> []
     | t::q -> (match info_ast_to_info t with
-              | InfoVar(_, ty, _, _) -> modifier_adresse_variable pos "LB" t;
-                                        mod_all_var q (pos - (getTaille ty));
+              | InfoVar(_, ty, _, _) -> let taille = getTaille ty in
+                                        modifier_adresse_variable (pos - taille) "LB" t;
+                                        mod_all_var q (pos - taille);
               | _ -> failwith "erreur dans la declaration de variable")
-  in let _ = mod_all_var rev (-1) in 
+  in let _ = mod_all_var rev (0) in 
   AstPlacement.Fonction(inf_fonc, inf_param, analyser_placement_bloc b 3 "LB")
  
 

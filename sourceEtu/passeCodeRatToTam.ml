@@ -35,7 +35,7 @@ let rec analyser_code_expression e =
                                         | AstType.PlusRat ->  res^(call "ST" "RAdd")
                                         | AstType.MultInt ->  res^(subr "IMul")
                                         | AstType.MultRat ->  res^(call "ST" "RMul")
-                                        | AstType.EquInt | AstType.EquBool ->  res^("SUBR IEq")
+                                        | AstType.EquInt | AstType.EquBool ->  res^(subr "IEq")
                                         | AstType.Inf ->      res^(subr "ILss"))
 
 
@@ -57,13 +57,13 @@ and analyser_code_instruction i =
   | AstPlacement.AffichageInt expr -> analyser_code_expression expr ^ subr "IOut"
   | AstPlacement.AffichageRat expr -> analyser_code_expression expr ^ call "ST" "ROut"
   | AstPlacement.AffichageBool expr -> analyser_code_expression expr ^ subr "BOut"
-  | AstPlacement.Conditionnelle (expr,b1,b2) -> let debut = "SI" in
-                                                let fin = "FSI" in 
-                                                label debut ^ 
+  | AstPlacement.Conditionnelle (expr,b1,b2) -> let sinon = getEtiquette() in
+                                                let fin = getEtiquette() in
                                                 analyser_code_expression expr ^
-                                                jumpif 0 debut ^
+                                                jumpif 0 sinon ^
                                                 analyser_code_bloc b1 ^
                                                 jump fin ^
+                                                label sinon ^
                                                 analyser_code_bloc b2 ^
                                                 label fin 
                                                 
@@ -73,7 +73,7 @@ and analyser_code_instruction i =
                                       analyser_code_expression expr ^
                                       jumpif 0 fin ^
                                       analyser_code_bloc b ^
-                                      jump fin ^
+                                      jump debut ^
                                       label fin
                                         
   | AstPlacement.Retour (expr,taille_ret,taille_param) -> analyser_code_expression expr ^ return taille_ret taille_param

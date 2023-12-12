@@ -4,6 +4,7 @@ open Ast
 open Tds
 open Tam
 open Type
+open Code
 
 
 type t1 = Ast.AstPlacement.programme
@@ -21,69 +22,61 @@ let rec analyser_code_expression e =
                                 | InfoVar(_, t, depl, reg) -> load (getTaille t) depl reg
                                 | InfoConst(_, i) -> loadl_int (i)
                                 | _ -> failwith "erreur dans la declaration de variable")
-  | AstType.Unaire(op, _) -> (match op with
-                                  | AstType.Numerateur -> pop (0) 1
-                                  | AstType.Denominateur -> pop (1) 1)
-  | AstType.Binaire(op, e1, e2) ->  let _ = analyser_code_expression e1 in
-                                    let _ = analyser_code_expression e2 in
+  | AstType.Unaire(op, e) ->  let res = analyser_code_expression e in
+                                (match op with
+                                  | Numerateur -> res^pop (0) 1
+                                  | Denominateur -> res^pop (1) 1)
+  | AstType.Binaire(op, e1, e2) ->  let res1 = analyser_code_expression e1 in
+                                    let res2 = analyser_code_expression e2 in
+                                    let res = res1^res2 in
                                         (match op with
-                                        | AstType.PlusInt ->  subr "IAdd"
-                                        | AstType.PlusRat ->  call "SB" "RAdd"
-                                        | AstType.MultInt ->  subr "IMul"
-                                        | AstType.MultRat ->  call "SB" "RMul"
-                                        | AstType.Fraction -> ""
-                                        | AstType.EquInt ->   subr "IEq"
-                                        | AstType.Inf ->      subr "ILess";
-                                        | AstType.EquBool ->  subr "IEq")
+                                        | AstType.Fraction -> res
+                                        | AstType.PlusInt ->  res^(subr "IAdd")
+                                        | AstType.PlusRat ->  res^(call "ST" "RAdd")
+                                        | AstType.MultInt ->  res^(subr "IMul")
+                                        | AstType.MultRat ->  res^(call "ST" "RMul")
+                                        | AstType.EquInt | AstType.EquBool ->  res^("SUBR IEq")
+                                        | AstType.Inf ->      res^(subr "ILss"))
 
 
 let rec analyser_code_bloc b = 
   match b with 
-  |(li, taille) -> let _ = String.concat "" (List.map analyser_code_instruction li) in
-                   pop (0) taille
+  |(li, taille) -> (String.concat "" (List.map analyser_code_instruction li)) ^
+                    (pop (0) taille)
 
 and analyser_code_instruction i =
   match i with 
-  | AstPlacement.Declaration (inf,expr) -> let _ = analyser_code_expression expr in
+  | AstPlacement.Declaration (inf,expr) -> let res = analyser_code_expression expr in
                                             (match info_ast_to_info inf with
-                                            | InfoVar(_,t,d,reg) ->  let _ = push (getTaille t) in
-                                                                    store (getTaille t) d reg
+                                            | InfoVar(_,t,d,reg) ->  push (getTaille t) ^ res ^ store (getTaille t) d reg
                                             | _ -> failwith "impossible")
-  | AstPlacement.Affectation (inf,expr) ->  let _ = analyser_code_expression expr in 
+  | AstPlacement.Affectation (inf,expr) ->  let res = analyser_code_expression expr in 
                                             (match info_ast_to_info inf with
-                                            | InfoVar(_,t,d,reg) -> store (getTaille t) d reg
+                                            | InfoVar(_,t,d,reg) -> res ^ store (getTaille t) d reg
                                             | _ -> failwith "impossible")
-  | AstPlacement.AffichageInt expr -> let res1 = analyser_code_expression expr in
-                                      let res2 = subr "IOut" in
-                                      print_endline res1;
-                                      print_endline res2;
-                                      res2
-  | AstPlacement.AffichageRat expr -> let _ = analyser_code_expression expr in
-                                      call "SB" "ROut"
-  | AstPlacement.AffichageBool expr -> let _ = analyser_code_expression expr in
-                                      subr "BOut"
-  | AstPlacement.Conditionnelle (expr,b1,b2) -> let _ = analyser_code_expression expr in
-                                                let debut = "SI" in
-                                                let fin = "FSI" in
-                                                let _ = label debut in
-                                                let _ = analyser_code_expression expr in
-                                                let _ = jumpif 0 debut in
-                                                let _ = analyser_code_bloc b1 in
-                                                let _ = jump fin in
-                                                let _ = analyser_code_bloc b2 in
-                                                label fin
+  | AstPlacement.AffichageInt expr -> analyser_code_expression expr ^ subr "IOut"
+  | AstPlacement.AffichageRat expr -> analyser_code_expression expr ^ call "ST" "ROut"
+  | AstPlacement.AffichageBool expr -> analyser_code_expression expr ^ subr "BOut"
+  | AstPlacement.Conditionnelle (expr,b1,b2) -> let debut = "SI" in
+                                                let fin = "FSI" in 
+                                                label debut ^ 
+                                                analyser_code_expression expr ^
+                                                jumpif 0 debut ^
+                                                analyser_code_bloc b1 ^
+                                                jump fin ^
+                                                analyser_code_bloc b2 ^
+                                                label fin 
                                                 
-  | AstPlacement.TantQue (expr,b) ->  let debut = "TQ" in
-                                      let fin = "FTQ" in
-                                      let _ = label debut in
-                                      let _ = analyser_code_expression expr in
-                                      let _ = jumpif 0 fin in
-                                      let _ = analyser_code_bloc b in
-                                      let _ = jump fin in
+  | AstPlacement.TantQue (expr,b) ->  let debut = getEtiquette() in
+                                      let fin = getEtiquette() in
+                                      label debut ^
+                                      analyser_code_expression expr ^
+                                      jumpif 0 fin ^
+                                      analyser_code_bloc b ^
+                                      jump fin ^
                                       label fin
                                         
-  | AstPlacement.Retour (expr,taille_ret,taille_param) -> let _ = analyser_code_expression expr in
-                                                                  return taille_ret taille_param
+  | AstPlacement.Retour (expr,taille_ret,taille_param) -> analyser_code_expression expr ^ return taille_ret taille_param
   | AstPlacement.Empty -> ""
 
 
@@ -92,5 +85,8 @@ let analyser_placement_fonction (AstType.Fonction(inf_fonc, inf_param, b)) = fai
  
 
 let analyser (AstPlacement.Programme(fonctions, prog)) = 
+  let code = ("main \n" ^ analyser_code_bloc prog ^ halt ) in
+  let analys = getEntete() ^ code in
   (* let nlf = List.map analyser_code_fonction fonctions in *)
-  analyser_code_bloc prog 
+  (* print_endline code; *)
+  analys

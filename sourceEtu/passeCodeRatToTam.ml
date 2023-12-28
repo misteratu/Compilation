@@ -13,7 +13,11 @@ type t2 = string
 
 let rec analyser_code_expression e = 
   match e with
-  | AstType.AppelFonction (info, l) -> failwith "caca"
+  | AstType.AppelFonction (info, l) ->  (match info_ast_to_info info with
+                                          | InfoFun(nom,_,_) ->  String.concat "" (List.map analyser_code_expression l) ^
+                                                                 call "ST" nom
+                                          | _ -> failwith "Impossible")
+
   | AstType.Entier(i) -> loadl_int i
   | AstType.Booleen(b) -> (match b with
                               | true -> loadl_int 1
@@ -81,12 +85,15 @@ and analyser_code_instruction i =
 
 
 
-let analyser_placement_fonction (AstType.Fonction(inf_fonc, inf_param, b)) = failwith "caca"
+let analyser_code_fonction (AstPlacement.Fonction(inf_fonc, _, b)) =
+  match info_ast_to_info inf_fonc with
+  | InfoFun (nom,_,_) -> label nom ^ analyser_code_bloc b
+  | _ -> failwith "Impossible"
  
 
 let analyser (AstPlacement.Programme(fonctions, prog)) = 
+  let foncs = String.concat "" (List.map analyser_code_fonction fonctions) in
   let code = ("main \n" ^ analyser_code_bloc prog ^ halt ) in
-  let analys = getEntete() ^ code in
-  (* let nlf = List.map analyser_code_fonction fonctions in *)
+  let analys = getEntete() ^ foncs ^ code in
   (* print_endline code; *)
   analys

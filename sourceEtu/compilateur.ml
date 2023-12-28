@@ -55,9 +55,9 @@ module CompilateurRat = Compilateur (PasseTdsRat) (PasseTypeRat) (PassePlacement
 *)
 
 (* + passe de placement mémoire *)
-(*
-module CompilateurRat = Compilateur (PasseTdsRat) (PasseTypeRat) (PassePlacementRat) (PasseCodeNop)
-*)
+
+(* module CompilateurRat = Compilateur (PasseTdsRat) (PasseTypeRat) (PassePlacementRat) (PasseCodeNop) *)
+
 
 (* + passe de génération de code -> compilateur complet *)
 

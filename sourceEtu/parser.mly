@@ -79,7 +79,7 @@ i :
 | RETURN exp=e PV                   {Retour (exp)}
 
 typ :
-| t=typ MULT    {Pointer of t}
+| t=typ MULT    {Pointer t}
 | BOOL          {Bool}
 | INT           {Int}
 | RAT           {Rat}

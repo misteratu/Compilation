@@ -90,11 +90,15 @@ struct
   remplacés par les informations associées aux identificateurs *)
   type expression =
     | AppelFonction of Tds.info_ast * expression list
-    | Ident of Tds.info_ast (* le nom de l'identifiant est remplacé par ses informations *)
+    | Affectable of Tds.info_ast
     | Booleen of bool
     | Entier of int
     | Unaire of AstSyntax.unaire * expression
     | Binaire of AstSyntax.binaire * expression * expression
+    | Null
+    | New of typ
+    | Adresse of Tds.info_ast (*On recupere l'adresse via le deplacement*)
+
 
   (* instructions existantes dans notre langage *)
   (* ~ instruction de l'AST syntaxique où les noms des identifiants ont été
@@ -133,15 +137,19 @@ type unaire = Numerateur | Denominateur
 (* Opérateurs binaires existants dans Rat - résolution de la surcharge *)
 type binaire = Fraction | PlusInt | PlusRat | MultInt | MultRat | EquInt | EquBool | Inf
 
+
 (* Expressions existantes dans Rat *)
 (* = expression de AstTds *)
 type expression =
   | AppelFonction of Tds.info_ast * expression list
-  | Ident of Tds.info_ast
+  | Affectable of Tds.info_ast
   | Booleen of bool
   | Entier of int
   | Unaire of unaire * expression
   | Binaire of binaire * expression * expression
+  | Null
+  | New of typ
+  | Adresse of Tds.info_ast
 
 (* instructions existantes Rat *)
 (* = instruction de AstTds + informations associées aux identificateurs, mises à jour *)

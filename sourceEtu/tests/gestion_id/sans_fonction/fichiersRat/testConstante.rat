@@ -1,0 +1,4 @@
+constante{
+    const a = 8;
+    a = 0;
+}

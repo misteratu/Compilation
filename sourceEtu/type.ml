@@ -1,10 +1,11 @@
-type typ = Bool | Int | Rat | Undefined
+type typ = Bool | Int | Rat | Undefined | Pointer of typ
 
-let string_of_type t = 
+let rec string_of_type t = 
   match t with
   | Bool ->  "Bool"
   | Int  ->  "Int"
   | Rat  ->  "Rat"
+  | Pointer t -> "*"^string_of_type t
   | Undefined -> "Undefined"
 
 
@@ -13,6 +14,7 @@ let est_compatible t1 t2 =
   | Bool, Bool -> true
   | Int, Int -> true
   | Rat, Rat -> true 
+  | Pointer _, Pointer _ -> true
   | _ -> false 
 
 let%test _ = est_compatible Bool Bool
@@ -50,6 +52,7 @@ let getTaille t =
   | Int -> 1
   | Bool -> 1
   | Rat -> 2
+  | Pointer _ -> 1
   | Undefined -> 0
   
 let%test _ = getTaille Int = 1

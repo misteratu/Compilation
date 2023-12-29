@@ -1,0 +1,11 @@
+int fonc (int * a int b) {
+    a = &b;
+    return 0;
+}
+
+main{
+    int * x = null;
+    int y = 8;
+    int z = call fonc (x y);
+    print (*x);
+}

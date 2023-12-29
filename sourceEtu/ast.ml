@@ -22,12 +22,19 @@ type unaire = Numerateur | Denominateur
 (* Opérateurs binaires de Rat *)
 type binaire = Fraction | Plus | Mult | Equ | Inf
 
+(* Affectable apres ajout pointeurs *)
+type affectable =
+  (* Identifiant représenté par son nom *)
+  | Ident of string
+  (* Dereferencement d'un identifiant *)
+  | Deref of affectable
+
 (* Expressions de Rat *)
 type expression =
   (* Appel de fonction représenté par le nom de la fonction et la liste des paramètres réels *)
   | AppelFonction of string * expression list
-  (* Accès à un identifiant représenté par son nom *)
-  | Ident of string
+  (* Accès à un affectable représenté par son nom ou affectable *)
+  | Affectable of affectable
   (* Booléen *)
   | Booleen of bool
   (* Entier *)
@@ -36,14 +43,20 @@ type expression =
   | Unaire of unaire * expression
   (* Opération binaire représentée par l'opérateur, l'opérande gauche et l'opérande droite *)
   | Binaire of binaire * expression * expression
+  (* Expression de pointeur null *)
+  | Null
+  (* Expression de reservation mémoire pour la valeur d'un pointeur *)
+  | New of typ
+  (* Adresse d'une variable *)
+  | Adresse of string
 
 (* Instructions de Rat *)
 type bloc = instruction list
 and instruction =
   (* Déclaration de variable représentée par son type, son nom et l'expression d'initialisation *)
   | Declaration of typ * string * expression
-  (* Affectation d'une variable représentée par son nom et la nouvelle valeur affectée *)
-  | Affectation of string * expression
+  (* Affectation d'une variable représentée par son affectable et la nouvelle valeur affectée *)
+  | Affectation of affectable * expression
   (* Déclaration d'une constante représentée par son nom et sa valeur (entier) *)
   | Constante of string * int
   (* Affichage d'une expression *)

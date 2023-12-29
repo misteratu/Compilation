@@ -1,0 +1,3 @@
+pointeur{
+    int * x = z;
+}

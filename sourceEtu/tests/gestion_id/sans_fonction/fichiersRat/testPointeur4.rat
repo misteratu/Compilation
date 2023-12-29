@@ -1,0 +1,5 @@
+pointeur{
+    int * x = null;
+    int y = 22;
+    x = &y;
+}

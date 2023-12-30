@@ -12,12 +12,17 @@ let rec analyse_tds_affectable tds a =
   match a with
   | AstSyntax.Ident n -> (match chercherGlobalement tds n with
                           | Some ia -> (match info_ast_to_info ia with
-                                        | InfoVar(_,_,_,_) -> ia
-                                        | InfoConst(_,_) -> ia
+                                        | InfoVar(_,_,_,_) -> AstTds.Ident(ia)
+                                        | InfoConst(_,_) -> AstTds.Ident(ia)
                                         | _ -> raise (MauvaiseUtilisationIdentifiant n))
                           | None -> raise (IdentifiantNonDeclare n))
   | AstSyntax.Deref a -> analyse_tds_affectable tds a
 
+
+let rec affectable_info a = 
+  match a with 
+  | AstTds.Ident ia -> ia
+  | AstTds.Deref ia -> affectable_info ia
 
 (* analyse_tds_expression : tds -> AstSyntax.expression -> AstTds.expression *)
 (* Paramètre tds : la table des symboles courante *)
@@ -82,7 +87,7 @@ let rec analyse_tds_instruction tds oia i =
   | AstSyntax.Affectation (n,e) ->
         let ia = analyse_tds_affectable tds n in
         (* Verification qu'on affecte pas a une constante *)
-        let ia2 = (match info_ast_to_info ia with
+        let ia2 = (match info_ast_to_info (affectable_info ia) with
         | InfoConst(n,_) -> raise (MauvaiseUtilisationIdentifiant n)
         | _ -> ia ) in
         let ne = analyse_tds_expression tds e in

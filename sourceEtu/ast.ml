@@ -156,7 +156,7 @@ type affectable =
 (* = expression de AstTds *)
 type expression =
   | AppelFonction of Tds.info_ast * expression list
-  | Affectable of affectable * expression
+  | Affectable of affectable
   | Booleen of bool
   | Entier of int
   | Unaire of unaire * expression

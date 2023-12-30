@@ -8,14 +8,37 @@ open Ast
 type t1 = Ast.AstTds.programme
 type t2 = Ast.AstType.programme
 
+
+let get_type_info info = 
+  match info with
+  | InfoConst (_,_) -> Int
+  | InfoVar (_,t,_,_) -> t
+  | InfoFun (_,t,_) -> t
+
+
+let rec analyse_type_affectable a =
+  match a with
+  | AstTds.Ident(ia) ->
+  (* Renvoie d'un couple composé du type de l'identifiant et du nouvel Ident *)
+  (get_type_info (info_ast_to_info ia), AstType.Ident(ia))
+  | AstTds.Deref da ->
+    (* Analyse de l'affectable *)
+    let (ta, nda) = analyse_type_affectable da in
+    match ta with
+    | Pointer(t) -> (t, AstType.Deref(nda, t))
+    | _ -> raise (TypeInattendu(ta, Pointer(Undefined)))
+
 (* analyse_type_expression : AstType.expression -> typ*)
 let rec get_typ_expression e = 
   match e with
-  | AstType.Ident id -> let inf = info_ast_to_info id in
-                    (match inf with
-                    | InfoConst (_,_) -> Int
-                    | InfoVar (_,t,_,_) -> t
-                    | _ -> failwith "Ident pour fonction")
+  | AstType.Affectable (a) -> (match a with 
+                            | AstType.Ident id -> let inf = info_ast_to_info id in
+                                                    (match inf with
+                                                    | InfoConst (_,_) -> Int
+                                                    | InfoVar (_,t,_,_) -> t
+                                                    | _ -> failwith "Ident pour fonction")
+                            | AstType.Deref (_, t) -> t
+                            )
   | AstType.Booleen _-> Bool
   | AstType.Entier _-> Int
   | AstType.Unaire (op,exp) -> (match exp with
@@ -23,15 +46,17 @@ let rec get_typ_expression e =
                                   (match op with
                                   | Numerateur -> get_typ_expression e1
                                   | Denominateur -> get_typ_expression e2)
-                                | AstType.Ident (id) -> 
-                                  let inf = info_ast_to_info id in
-                                  (match inf with
-                                  | InfoConst (_,_) -> Int
-                                  | InfoVar (_,t,_,_)
-                                  | InfoFun (_,t,_) -> if t=Rat then
-                                                        Int
-                                                    else raise  (TypeInattendu (t,Rat))
-                                  )
+                                | AstType.Affectable (a) -> (match a with 
+                                                          | AstType.Ident id -> let inf = info_ast_to_info id in
+                                                                                (match inf with
+                                                                                | InfoConst (_,_) -> Int
+                                                                                | InfoVar (_,t,_,_)
+                                                                                | InfoFun (_,t,_) -> if t=Rat then
+                                                                                                      Int
+                                                                                                  else raise  (TypeInattendu (t,Rat))
+                                                                                )
+                                                          | AstType.Deref (_, t) -> t
+                                                          )
                                 | _ -> raise (TypeInattendu(get_typ_expression exp,Rat))
                                 )
   | AstType.Binaire (op,_,_) -> (match op with
@@ -47,14 +72,11 @@ let rec get_typ_expression e =
                                       (match inf with
                                       | InfoFun (_,t,_) -> t
                                       | _ -> failwith "Non InfoFun pour fonction")
+  | AstType.New t -> Pointer t
+  | AstType.Null -> Pointer (Undefined)
+  | AstType.Adresse info -> get_type_info (info_ast_to_info info)
+
 let get_typ_list el = List.map (get_typ_expression) el
-
-
-let get_type_info info = 
-  match info with
-  | InfoConst (_,_) -> Int
-  | InfoVar (_,t,_,_) -> t
-  | InfoFun (_,t,_) -> t
 
 (* TO DO*)
 let rec analyse_type_expression e = 
@@ -67,9 +89,10 @@ let rec analyse_type_expression e =
                                                               else raise (TypesParametresInattendus (tl,tlf))
                                       | _ -> failwith "Non InfoFun pour fonction"
                                       )
-
-                                        
-  | AstTds.Ident (blc) -> AstType.Ident (blc)
+              
+  | AstTds.Affectable (a) -> let (_, na) = analyse_type_affectable a in 
+                              AstType.Affectable(na)
+                            
   | AstTds.Booleen (b) -> AstType.Booleen (b)
   | AstTds.Entier (i) -> AstType.Entier (i)
   | AstTds.Unaire (op, exp) -> (match op with 
@@ -90,6 +113,15 @@ let rec analyse_type_expression e =
                                           | Bool, Equ, Bool -> AstType.Binaire (EquBool, ne1, ne2)
                                           | Int, Inf, Int -> AstType.Binaire (Inf, ne1, ne2)
                                           | _ -> raise (TypeBinaireInattendu (op, t1, t2)))
+  | AstTds.Null -> AstType.Null
+  | AstTds.New t -> AstType.New t
+  | AstTds.Adresse (info) -> AstType.Adresse (info)
+  
+let rec affectable_to_info a = 
+  match a with
+  | AstTds.Ident(ia) -> info_ast_to_info ia
+  | AstTds.Deref da -> affectable_to_info da
+
 
 (* TO DO*)
 let rec analyse_type_instruction i =
@@ -103,12 +135,13 @@ let rec analyse_type_instruction i =
                                           raise (TypeInattendu (te,t))
   | AstTds.Affectation (info,e) -> let ne = analyse_type_expression e in 
                                   let te = get_typ_expression ne in
-                                  (match info_ast_to_info info with
-                                  | InfoConst (_, _) ->  if est_compatible Int te then AstType.Affectation (info, ne)
+                                  let (_, a) = analyse_type_affectable info in
+                                  (match affectable_to_info info with
+                                  | InfoConst (_, _) ->  if est_compatible Int te then AstType.Affectation (a, ne)
                                   else raise (TypeInattendu (te,Int))
-                                  | InfoVar (_, t, _, _) -> if est_compatible t te then AstType.Affectation (info, ne)
+                                  | InfoVar (_, t, _, _) -> if est_compatible t te then AstType.Affectation (a, ne)
                                                     else raise (TypeInattendu (te,t))
-                                  | InfoFun (_, t, _) -> if est_compatible t te then AstType.Affectation (info, ne)
+                                  | InfoFun (_, t, _) -> if est_compatible t te then AstType.Affectation (a, ne)
                                                        else raise (TypeInattendu (te,t))
                                   )
   | AstTds.Affichage e -> (let ne = analyse_type_expression e in 

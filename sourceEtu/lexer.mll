@@ -24,7 +24,6 @@
         "bool",    BOOL;
         "int",     INT;
         "rat",     RAT;
-        "call",    CALL;
         "num",     NUM;
         "denom",   DENOM;
         "true",    TRUE;
@@ -48,6 +47,7 @@ rule token = parse
 | "//"[^'\n']* { token lexbuf }
 
 (* caractères spéciaux de RAT *)
+| ","          { VIRG }
 | ";"          { PV }
 | "{"          { AO }
 | "}"          { AF }

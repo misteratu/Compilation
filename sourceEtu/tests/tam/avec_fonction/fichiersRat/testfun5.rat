@@ -3,6 +3,6 @@ int f1 (int i){
 }
 
 test{
-  int x = call f1 (13);
+  int x = f1 (13);
   print x;
 }

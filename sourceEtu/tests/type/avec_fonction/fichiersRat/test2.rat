@@ -1,4 +1,4 @@
-int plus1 (int a int b){
+int plus1 (int a, int b){
   int c = 1;
   return (a+(b+c));
 }
@@ -6,5 +6,5 @@ int plus1 (int a int b){
 fonction{
   int x = 3;
   int y = 4;
-  print call plus1 (x y);
+  print plus1 (x, y);
 }

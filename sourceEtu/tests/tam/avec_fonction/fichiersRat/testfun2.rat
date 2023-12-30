@@ -3,5 +3,5 @@ int f (int a){
 }
 
 test{
-  print call f ((3+4));
+  print f ((3+4));
 }

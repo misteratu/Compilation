@@ -160,7 +160,6 @@ let%test_unit "testConstante" =
   with
   | MauvaiseUtilisationIdentifiant("a") -> ()
 
-
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix
 open Filename

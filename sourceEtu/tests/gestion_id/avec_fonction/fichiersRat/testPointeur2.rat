@@ -5,6 +5,6 @@ int fonc (int * a) {
 
 main{
     int * x = (new int);
-    int z = call fonc (x);
+    int z = fonc (x);
     print (*x);
 }

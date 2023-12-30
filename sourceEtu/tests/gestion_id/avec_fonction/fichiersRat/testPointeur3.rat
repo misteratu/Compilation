@@ -4,6 +4,6 @@ int fonc (int * a) {
 }
 
 main{
-    int z = call fonc (null);
+    int z = fonc (null);
     int * x = null;
 }

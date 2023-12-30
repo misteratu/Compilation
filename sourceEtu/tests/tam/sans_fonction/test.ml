@@ -14,7 +14,7 @@ let runtamcode cmde ratfile =
   let ic = Unix.open_process_in (cmde ^ " " ^ tamfile) in
   let printed = input_line ic in
   close_in ic;
-  (* Sys.remove tamfile;    à commenter si on veut étudier le code TAM. *)
+  Sys.remove tamfile;    (* à commenter si on veut étudier le code TAM. *)
   String.trim printed
 
 (* Compile and run ratfile, then print its output *)

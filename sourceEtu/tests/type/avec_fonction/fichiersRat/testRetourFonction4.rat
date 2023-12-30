@@ -1,4 +1,4 @@
-int add1 (int x int y){
+int add1 (int x, int y){
   int z = (x+y);
   while (true) {
     return false;
@@ -7,5 +7,5 @@ int add1 (int x int y){
 
 
 test{
-  int x = call add1 (3 4);
+  int x = add1 (3, 4);
 }

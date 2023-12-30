@@ -1,4 +1,4 @@
-int fonc (int * a int b) {
+int fonc (int * a, int b) {
     a = &b;
     return 0;
 }
@@ -6,6 +6,6 @@ int fonc (int * a int b) {
 main{
     int * x = null;
     int y = 8;
-    int z = call fonc (x y);
+    int z = fonc (x, y);
     print (*x);
 }

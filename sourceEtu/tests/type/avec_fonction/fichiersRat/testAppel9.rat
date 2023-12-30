@@ -1,4 +1,4 @@
-int add1 (int x int y){
+int add1 (int x, int y){
   int z = (x+y);
   return (z+1);
 }
@@ -6,5 +6,5 @@ int add1 (int x int y){
 
 test{
   bool z = true;
-  int x = call add1 (4 z);
+  int x = add1 (4, z);
 }

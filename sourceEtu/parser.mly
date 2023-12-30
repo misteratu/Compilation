@@ -10,6 +10,7 @@ open Ast.AstSyntax
 %token <int> ENTIER
 %token <string> ID
 %token RETURN
+%token VIRG
 %token PV
 %token AO
 %token AF
@@ -24,7 +25,6 @@ open Ast.AstSyntax
 %token BOOL
 %token INT
 %token RAT
-%token CALL 
 %token CO
 %token CF
 %token SLASH
@@ -59,7 +59,7 @@ main : lfi=prog EOF     {lfi}
 
 prog : lf=fonc* ID li=bloc  {Programme (lf,li)}
 
-fonc : t=typ n=ID PO lp=param* PF li=bloc {Fonction(t,n,lp,li)}
+fonc : t=typ n=ID PO lp=separated_list(VIRG,param) PF li=bloc {Fonction(t,n,lp,li)}
 
 param : t=typ n=ID  {(t,n)}
 
@@ -80,12 +80,12 @@ i :
 
 typ :
 | t=typ MULT    {Pointer t}
-| BOOL          {Bool}
-| INT           {Int}
-| RAT           {Rat}
+| BOOL    {Bool}
+| INT     {Int}
+| RAT     {Rat}
 
 e : 
-| CALL n=ID PO lp=e* PF   {AppelFonction (n,lp)}
+| n=ID PO lp=separated_list(VIRG,e) PF   {AppelFonction (n,lp)}
 | CO e1=e SLASH e2=e CF   {Binaire(Fraction,e1,e2)}
 | n=a                     {Affectable n}
 | TRUE                    {Booleen true}
@@ -101,5 +101,3 @@ e :
 | NULL                    {Null}
 | NEW t=typ               {New t}
 | REF n=ID                {Adresse n}
-
-

@@ -11,6 +11,26 @@ type t1 = Ast.AstPlacement.programme
 type t2 = string
 
 
+let rec analyse_code_affectable a mode deref =
+  match a with
+  | AstType.Ident info ->
+    (match info_ast_to_info info with
+     | InfoVar(_, t, d, reg) -> if (est_compatible t (Pointer(Undefined))) then
+                                    if mode = "e" && not deref then
+                                          store (getTaille t) d reg
+                                    else load (getTaille t) d reg
+                                else if (mode = "l") then load (getTaille t) d reg
+                                else store (getTaille t) d reg
+     | InfoConst(_, i) -> loadl_int i
+     | _ -> failwith "Impossible Ident")
+  | AstType.Deref (da, t) ->
+    let taille = getTaille t in
+    let res = analyse_code_affectable da "e" true in
+    res ^ (if (mode = "e" && not deref) then
+             storei taille
+           else
+             loadi taille)
+
 let rec analyser_code_expression e = 
   match e with
   | AstType.AppelFonction (info, l) ->  (match info_ast_to_info info with
@@ -22,10 +42,7 @@ let rec analyser_code_expression e =
   | AstType.Booleen(b) -> (match b with
                               | true -> loadl_int 1
                               | false -> loadl_int 0 )
-  | AstType.Ident(info) -> (match info_ast_to_info info with 
-                                | InfoVar(_, t, depl, reg) -> load (getTaille t) depl reg
-                                | InfoConst(_, i) -> loadl_int (i)
-                                | _ -> failwith "erreur dans la declaration de variable")
+  | AstType.Affectable(a) -> analyse_code_affectable a "l" false
   | AstType.Unaire(op, e) ->  let res = analyser_code_expression e in
                                 (match op with
                                   | Numerateur -> res^pop (0) 1
@@ -41,6 +58,11 @@ let rec analyser_code_expression e =
                                         | AstType.MultRat ->  res^(call "ST" "RMul")
                                         | AstType.EquInt | AstType.EquBool ->  res^(subr "IEq")
                                         | AstType.Inf ->      res^(subr "ILss"))
+  | AstType.Null -> loadl_int 0
+  | AstType.New(t) -> loadl_int (getTaille t) ^ subr "MAlloc"
+  | AstType.Adresse(infoa) -> (match info_ast_to_info infoa with
+                                | InfoVar(_,_,d,reg) -> loada  d reg
+                                | _ -> failwith "Impossible")
 
 
 let rec analyser_code_bloc b = 
@@ -54,10 +76,14 @@ and analyser_code_instruction i =
                                             (match info_ast_to_info inf with
                                             | InfoVar(_,t,d,reg) ->  push (getTaille t) ^ res ^ store (getTaille t) d reg
                                             | _ -> failwith "impossible")
-  | AstPlacement.Affectation (inf,expr) ->  let res = analyser_code_expression expr in 
+  | AstPlacement.Affectation (a,expr) ->  analyser_code_expression expr ^ analyse_code_affectable a "e" false
+    
+    
+    
+    (*let res = analyser_code_expression expr in 
                                             (match info_ast_to_info inf with
                                             | InfoVar(_,t,d,reg) -> res ^ store (getTaille t) d reg
-                                            | _ -> failwith "impossible")
+                                            | _ -> failwith "impossible") *)
   | AstPlacement.AffichageInt expr -> analyser_code_expression expr ^ subr "IOut"
   | AstPlacement.AffichageRat expr -> analyser_code_expression expr ^ call "ST" "ROut"
   | AstPlacement.AffichageBool expr -> analyser_code_expression expr ^ subr "BOut"
@@ -87,7 +113,7 @@ and analyser_code_instruction i =
 
 let analyser_code_fonction (AstPlacement.Fonction(inf_fonc, _, b)) =
   match info_ast_to_info inf_fonc with
-  | InfoFun (nom,_,_) -> label nom ^ analyser_code_bloc b
+  | InfoFun (nom,_,_) -> label nom ^ analyser_code_bloc b ^ halt
   | _ -> failwith "Impossible"
  
 

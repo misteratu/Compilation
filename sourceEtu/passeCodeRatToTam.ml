@@ -11,25 +11,45 @@ type t1 = Ast.AstPlacement.programme
 type t2 = string
 
 
+(*
+  [analyse_code_affectable : AstType.affectable -> string -> bool -> string]
+
+  Cette fonction génère le code assembleur pour un affectable de type AstType.
+
+  Paramètres :
+  - a : Affectable AstType à générer.
+  - mode : Mode d'accès ("l" pour lecture, "e" pour écriture).
+  - deref : Booléen indiquant si l'affectable a subi un déréférencement.
+
+  Résultat :
+  - Chaîne de caractères représentant le code assembleur généré.
+*)
+
 let rec analyse_code_affectable a mode deref =
+  (* Analyse de l'affectable *)
   match a with
   | AstType.Ident info ->
     (match info_ast_to_info info with
-     | InfoVar(_, t, d, reg) -> if (est_compatible t (Pointer(Undefined))) then
-                                    if mode = "e" && not deref then
-                                          store (getTaille t) d reg
-                                    else load (getTaille t) d reg
-                                else if (mode = "l") then load (getTaille t) d reg
-                                else store (getTaille t) d reg
+     | InfoVar(_, t, d, reg) -> 
+        if est_compatible t (Pointer(Undefined)) then
+          if mode = "e" && not deref then
+            store (getTaille t) d reg
+          else
+            load (getTaille t) d reg
+        else if mode = "l" then
+          load (getTaille t) d reg
+        else
+          store (getTaille t) d reg
      | InfoConst(_, i) -> loadl_int i
      | _ -> failwith "Impossible Ident")
   | AstType.Deref (da, t) ->
     let taille = getTaille t in
     let res = analyse_code_affectable da "e" true in
-    res ^ (if (mode = "e" && not deref) then
+    res ^ (if mode = "e" && not deref then
              storei taille
            else
              loadi taille)
+
 
 let rec analyser_code_expression e = 
   match e with
@@ -77,13 +97,6 @@ and analyser_code_instruction i =
                                             | InfoVar(_,t,d,reg) ->  push (getTaille t) ^ res ^ store (getTaille t) d reg
                                             | _ -> failwith "impossible")
   | AstPlacement.Affectation (a,expr) ->  analyser_code_expression expr ^ analyse_code_affectable a "e" false
-    
-    
-    
-    (*let res = analyser_code_expression expr in 
-                                            (match info_ast_to_info inf with
-                                            | InfoVar(_,t,d,reg) -> res ^ store (getTaille t) d reg
-                                            | _ -> failwith "impossible") *)
   | AstPlacement.AffichageInt expr -> analyser_code_expression expr ^ subr "IOut"
   | AstPlacement.AffichageRat expr -> analyser_code_expression expr ^ call "ST" "ROut"
   | AstPlacement.AffichageBool expr -> analyser_code_expression expr ^ subr "BOut"

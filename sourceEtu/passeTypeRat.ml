@@ -9,18 +9,43 @@ type t1 = Ast.AstTds.programme
 type t2 = Ast.AstType.programme
 
 
+(*
+  [get_type_info : info_ast -> typ]
+
+  Cette fonction renvoie le type associé à une information (constante, variable, fonction).
+
+  Paramètre :
+  - Information (constante, variable, fonction).
+
+  Résultat :
+  - Type associé à l'information.
+*)
 let get_type_info info = 
   match info with
-  | InfoConst (_,_) -> Int
-  | InfoVar (_,t,_,_) -> t
-  | InfoFun (_,t,_) -> t
+  | InfoConst (_,_) -> Int            (* Si c'est une constante, le type est Int *)
+  | InfoVar (_,t,_,_) -> t            (* Si c'est une variable, on renvoie son type *)
+  | InfoFun (_,t,_) -> t              (* Si c'est une fonction, on renvoie son type *)
 
 
+(*
+  [analyse_type_affectable : AstTds.affectable -> typ * AstType.affectable]
+
+  Cette fonction analyse le type d'un affectable (variable ou déréférencement).
+
+  Paramètre :
+  - Affectable à analyser.
+
+  Résultat :
+  - Couple composé du type de l'affectable et de l'affectable transformé en AstType.
+  
+  Erreur :
+  - Si le type de l'affectable n'est pas conforme aux attentes, une exception de type "TypeInattendu" est levée.
+*)
 let rec analyse_type_affectable a =
   match a with
   | AstTds.Ident(ia) ->
-  (* Renvoie d'un couple composé du type de l'identifiant et du nouvel Ident *)
-  (get_type_info (info_ast_to_info ia), AstType.Ident(ia))
+    (* Renvoie d'un couple composé du type de l'identifiant et du nouvel Ident *)
+    (get_type_info (info_ast_to_info ia), AstType.Ident(ia))
   | AstTds.Deref da ->
     (* Analyse de l'affectable *)
     let (ta, nda) = analyse_type_affectable da in
@@ -28,18 +53,33 @@ let rec analyse_type_affectable a =
     | Pointer(t) -> (t, AstType.Deref(nda, t))
     | _ -> raise (TypeInattendu(ta, Pointer(Undefined)))
 
-(* analyse_type_expression : AstType.expression -> typ*)
+
+(*
+  [analyse_type_expression : AstType.expression -> typ]
+
+  Cette fonction analyse le type d'une expression.
+
+  Paramètre :
+  - Expression à analyser.
+
+  Résultat :
+  - Type de l'expression.
+
+  Erreur :
+  - Si le type de l'expression n'est pas conforme aux attentes, des exceptions de type "TypeInattendu" sont levées.
+*)
 let rec get_typ_expression e = 
+  (* Analyse de l'expression *)
   match e with
   | AstType.Affectable (a) -> (match a with 
                             | AstType.Ident id -> let inf = info_ast_to_info id in
                                                     (match inf with
-                                                    | InfoConst (_,_) -> Int
-                                                    | InfoVar (_,t,_,_) -> t
+                                                    | InfoConst (_,_) -> Int  (* Si c'est une constante alors cela est forcément un entier *)
+                                                    | InfoVar (_,t,_,_) -> t  (* Si c'est une variable, on renvoie son type *)
                                                     | _ -> failwith "Ident pour fonction")
                             | AstType.Deref (_, t) -> t
                             )
-  | AstType.Booleen _-> Bool
+  | AstType.Booleen _-> Bool 
   | AstType.Entier _-> Int
   | AstType.Unaire (op,exp) -> (match exp with
                                 | AstType.Binaire (_,e1,e2) ->  
@@ -59,15 +99,16 @@ let rec get_typ_expression e =
                                                           )
                                 | _ -> raise (TypeInattendu(get_typ_expression exp,Rat))
                                 )
-  | AstType.Binaire (op,_,_) -> (match op with
-                                      | Fraction -> Rat
-                                      | PlusInt -> Int
-                                      | PlusRat -> Rat
-                                      | MultInt -> Int
-                                      | MultRat -> Rat
-                                      | EquInt -> Bool
-                                      | EquBool -> Bool
-                                      | Inf -> Bool)
+  | AstType.Binaire (op,_,_) -> (* Gestions de toutes les opérations possibles *)
+                                (match op with
+                                  | Fraction -> Rat
+                                  | PlusInt -> Int
+                                  | PlusRat -> Rat
+                                  | MultInt -> Int
+                                  | MultRat -> Rat
+                                  | EquInt -> Bool
+                                  | EquBool -> Bool
+                                  | Inf -> Bool)
   | AstType.AppelFonction (infa,_) -> let inf = info_ast_to_info infa in
                                       (match inf with
                                       | InfoFun (_,t,_) -> t
@@ -76,33 +117,66 @@ let rec get_typ_expression e =
   | AstType.Null -> Pointer (Undefined)
   | AstType.Adresse info -> get_type_info (info_ast_to_info info)
 
+(*
+  [get_typ_list : AstType.expression list -> typ list]
+
+  Cette fonction réalise l'analyse de type pour une liste d'expressions.
+
+  Paramètre :
+  - Liste d'expressions à analyser.
+
+  Résultat :
+  - Liste de types associés aux expressions.
+*)
 let get_typ_list el = List.map (get_typ_expression) el
 
-(* TO DO*)
+
+(*
+  [analyse_type_expression : AstTds.expression -> AstType.expression]
+
+  Cette fonction réalise l'analyse de type pour une expression AstTds.
+
+  Paramètre :
+  - Expression AstTds à analyser.
+
+  Résultat :
+  - Expression AstType correspondant à l'analyse de type de l'expression.
+*)
 let rec analyse_type_expression e = 
   match e with 
-  | AstTds.AppelFonction(info, el) -> let el_n = List.map (analyse_type_expression) el in
+  | AstTds.AppelFonction(info, el) -> (* Récuération de la liste de expressions *)
+                                      let el_n = List.map (analyse_type_expression) el in
+                                      (* Récupération de la liste de types associés aux expressions *)
                                       let tl = get_typ_list el_n in
+                                      (* Récupération de l'information de la fonction *)
                                       let inf = info_ast_to_info info in
                                       (match inf with
-                                      | InfoFun (_,_, tlf) -> if est_compatible_list tl tlf then AstType.AppelFonction (info, el_n)
+                                      | InfoFun (_,_, tlf) -> (* Vérification de la comptabilité des différents types *)
+                                                              if est_compatible_list tl tlf then AstType.AppelFonction (info, el_n)
                                                               else raise (TypesParametresInattendus (tl,tlf))
                                       | _ -> failwith "Non InfoFun pour fonction"
                                       )
               
-  | AstTds.Affectable (a) -> let (_, na) = analyse_type_affectable a in 
+  | AstTds.Affectable (a) ->  (* Analyse de l'affectable *)
+                              let (_, na) = analyse_type_affectable a in 
+                              (* Création d'un affectable dans AstType*)
                               AstType.Affectable(na)
                             
   | AstTds.Booleen (b) -> AstType.Booleen (b)
   | AstTds.Entier (i) -> AstType.Entier (i)
-  | AstTds.Unaire (op, exp) -> (match op with 
-                                  | AstSyntax.Denominateur -> AstType.Unaire (Denominateur, analyse_type_expression exp)
-                                  | AstSyntax.Numerateur -> AstType.Unaire (Numerateur, analyse_type_expression exp)
-                                  )
-  | AstTds.Binaire (op, exp1, exp2) ->  let ne1 = analyse_type_expression exp1 in
+  | AstTds.Unaire (op, exp) -> (* Gestion des opérations de unaire *)
+                              (match op with 
+                                | AstSyntax.Denominateur -> AstType.Unaire (Denominateur, analyse_type_expression exp)
+                                | AstSyntax.Numerateur -> AstType.Unaire (Numerateur, analyse_type_expression exp)
+                              )
+  | AstTds.Binaire (op, exp1, exp2) ->  (* Analyse de la première expression *)
+                                        let ne1 = analyse_type_expression exp1 in
+                                        (* Analyse de la seconde expression *)
                                         let ne2 = analyse_type_expression exp2 in
+                                        (* Récupération des types associés aux expressions *)
                                         let t1 = get_typ_expression ne1 in
                                         let t2 = get_typ_expression ne2 in
+                                        (* Création d'une expression binaire dans AstType en fonction de l'opération*)
                                           (match t1, op, t2 with 
                                           | Int, Plus, Int -> AstType.Binaire (PlusInt, ne1, ne2)
                                           | Rat, Plus, Rat -> AstType.Binaire (PlusRat, ne1, ne2)
@@ -117,63 +191,117 @@ let rec analyse_type_expression e =
   | AstTds.New t -> AstType.New t
   | AstTds.Adresse (info) -> AstType.Adresse (info)
   
+(*
+  [affectable_to_info : AstTds.affectable -> Info_ast.info option]
+
+  Cette fonction convertit un affectable de type AstTds en une information de type Info_ast.
+
+  Paramètre :
+  - Affectable AstTds à convertir.
+
+  Résultat :
+  - Information de type Info_ast correspondant à l'affectable.
+*)
+
 let rec affectable_to_info a = 
   match a with
-  | AstTds.Ident(ia) -> info_ast_to_info ia
-  | AstTds.Deref da -> affectable_to_info da
+  | AstTds.Ident(ia) -> 
+      info_ast_to_info ia
+
+  | AstTds.Deref da -> 
+      affectable_to_info da
 
 
-(* TO DO*)
+(*
+  [analyse_type_instruction : AstTds.instruction -> AstType.instruction]
+
+  Cette fonction effectue l'analyse de type pour une instruction de type AstTds et renvoie
+  une instruction de type AstType. Elle assure la cohérence des types lors de l'analyse.
+
+  Paramètre :
+  - Instruction AstTds à analyser.
+
+  Résultat :
+  - Instruction AstType résultant de l'analyse de type.
+
+  Erreurs possibles :
+  - [TypeInattendu] : En cas d'incompatibilité des types lors de l'analyse.
+*)
+
 let rec analyse_type_instruction i =
   match i with
-  | AstTds.Declaration (t, n, e) -> let ne = analyse_type_expression e in 
-                                      let te = get_typ_expression ne in
-                                        if est_compatible t te then
-                                          (modifier_type_variable te n;
-                                          AstType.Declaration (n, ne))
-                                        else 
-                                          raise (TypeInattendu (te,t))
-  | AstTds.Affectation (info,e) -> let ne = analyse_type_expression e in 
-                                  let te = get_typ_expression ne in
-                                  let (_, a) = analyse_type_affectable info in
-                                  (match affectable_to_info info with
-                                  | InfoConst (_, _) ->  if est_compatible Int te then AstType.Affectation (a, ne)
-                                  else raise (TypeInattendu (te,Int))
-                                  | InfoVar (_, t, _, _) -> if est_compatible t te then AstType.Affectation (a, ne)
-                                                    else raise (TypeInattendu (te,t))
-                                  | InfoFun (_, t, _) -> if est_compatible t te then AstType.Affectation (a, ne)
-                                                       else raise (TypeInattendu (te,t))
-                                  )
-  | AstTds.Affichage e -> (let ne = analyse_type_expression e in 
-                            let te = get_typ_expression ne in
-                              match te with
-                              | Int -> AstType.AffichageInt ne
-                              | Rat -> AstType.AffichageRat ne
-                              | Bool -> AstType.AffichageBool ne
-                              | _ -> failwith "Erreur dans l'affichage")
-      
-  | AstTds.Conditionnelle (c,t,e) -> (let nc = analyse_type_expression c in 
-                                        let tc = get_typ_expression nc in
-                                         match tc with
-                                         | Type.Bool -> let nt = analyse_type_bloc t in
-                                                        let ne = analyse_type_bloc e in
-                                                        AstType.Conditionnelle (nc, nt, ne)
-                                         | _ -> raise (TypeInattendu(tc,Bool)))
-      
-  | AstTds.TantQue (c,b) -> (let nc = analyse_type_expression c in 
-                              let tc = get_typ_expression nc in
-                                match tc with
-                                | Bool -> let nb = analyse_type_bloc b in
-                                               AstType.TantQue (nc, nb)
-                                | _ -> raise (TypeInattendu(tc,Bool)))
-      
-  | AstTds.Retour (e, info) -> (let ne = analyse_type_expression e in 
-                                let te = get_typ_expression ne in
-                                  match info_ast_to_info info with
-                                  | InfoFun (_, t, _) -> if est_compatible t te then AstType.Retour (ne, info)
-                                                        else raise (TypeInattendu (te,t))
-                                  | _ -> failwith "Erreur dans le retour")
+  | AstTds.Declaration (t, n, e) ->
+      (* Analyse de l'expression *)
+      let ne = analyse_type_expression e in 
+      (* Récupération du type associé à l'expression *)
+      let te = get_typ_expression ne in
+      (* Vérification de la compatibilité des types *)
+      if est_compatible t te then
+        (* Ajout de la variable à la tds *)
+        (modifier_type_variable te n;
+         AstType.Declaration (n, ne))
+      else 
+        raise (TypeInattendu (te,t))
+
+  | AstTds.Affectation (info,e) ->
+      (* Analyse de l'expression *)
+      let ne = analyse_type_expression e in 
+      (* Récupération du type associé à l'expression *)
+      let te = get_typ_expression ne in
+      (* Récupération de l'information associée à l'affectable *)
+      let (_, a) = analyse_type_affectable info in
+      (match affectable_to_info info with
+      | InfoConst (_, _) -> if est_compatible Int te then AstType.Affectation (a, ne)
+                            else raise (TypeInattendu (te,Int))
+      | InfoVar (_, t, _, _) -> if est_compatible t te then AstType.Affectation (a, ne)
+                                else raise (TypeInattendu (te,t))
+      | InfoFun (_, t, _) -> if est_compatible t te then AstType.Affectation (a, ne)
+                             else raise (TypeInattendu (te,t)))
+
+  | AstTds.Affichage e ->
+      (* Analyse de l'expression *)
+       (let ne = analyse_type_expression e in 
+       (* Récupération du type associé à l'expression *)
+       let te = get_typ_expression ne in
+        (* Création d'un affichage dans AstType en fonction du type de l'expression *)
+       match te with
+       | Int -> AstType.AffichageInt ne
+       | Rat -> AstType.AffichageRat ne
+       | Bool -> AstType.AffichageBool ne
+       | _ -> failwith "Erreur dans l'affichage")
+
+  | AstTds.Conditionnelle (c,t,e) ->
+      (* Analyse de l'expression *)
+      (let nc = analyse_type_expression c in 
+      (* Récupération du type associé à l'expression *)
+       let tc = get_typ_expression nc in
+      (* Analyse du bloc then *)
+       match tc with
+       | Type.Bool ->
+          let nt = analyse_type_bloc t in
+          let ne = analyse_type_bloc e in
+          AstType.Conditionnelle (nc, nt, ne)
+       | _ -> raise (TypeInattendu(tc,Bool)))
+
+  | AstTds.TantQue (c,b) ->
+      (let nc = analyse_type_expression c in 
+       let tc = get_typ_expression nc in
+       match tc with
+       | Bool ->
+           let nb = analyse_type_bloc b in
+           AstType.TantQue (nc, nb)
+       | _ -> raise (TypeInattendu(tc,Bool)))
+
+  | AstTds.Retour (e, info) ->
+      (let ne = analyse_type_expression e in 
+       let te = get_typ_expression ne in
+       match info_ast_to_info info with
+       | InfoFun (_, t, _) -> if est_compatible t te then AstType.Retour (ne, info)
+                             else raise (TypeInattendu (te,t))
+       | _ -> failwith "Erreur dans le retour")
+
   | AstTds.Empty -> AstType.Empty
+
 
 
 (* analyse_tds_bloc : tds -> info_ast option -> AstTds.bloc -> AstTds.bloc *)
@@ -189,13 +317,31 @@ and analyse_type_bloc li =
    nli
 
 
-(* TO DO*)
+(*
+  [analyse_type_fonction : AstTds.fonction -> AstType.fonction]
+
+  Cette fonction effectue l'analyse de type pour une fonction de type AstTds et renvoie
+  une fonction de type AstType. Elle assure la cohérence des types lors de l'analyse.
+
+  Paramètres :
+  - Fonction AstTds à analyser.
+
+  Résultat :
+  - Fonction AstType résultant de l'analyse de type.
+
+  Erreurs possibles :
+  - [TypeInattendu] : En cas d'incompatibilité des types lors de l'analyse.
+*)
+
 let analyse_type_fonction (AstTds.Fonction(t,inf_fonc,l_param,li)) =
+  (* Ajout du type des paramètres à la tds *)
   let l_typ_param = List.map (fun (t,_) -> t) l_param in
   modifier_type_fonction t l_typ_param inf_fonc;
   let _ = List.map (fun (t,i) -> modifier_type_variable t i) l_param in
   let l_param_new = List.map (fun (_,i) -> i) l_param in
+  (* Analyse du bloc *)
   let nli = analyse_type_bloc li in
+  (* Création d'une fonction dans AstType *)
   AstType.Fonction(inf_fonc,l_param_new,nli)
 
 

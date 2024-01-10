@@ -7,10 +7,18 @@ open Ast
 type t1 = Ast.AstSyntax.programme
 type t2 = Ast.AstTds.programme
 
+
+
+let rec affectable_info a = 
+  match a with 
+  | AstTds.Ident ia -> ia
+  | AstTds.Deref ia -> affectable_info ia
+  | AstTds.TabInd (ia, _) -> affectable_info ia
 (* Renvoie une info ast correspondante a l'affectable, erreur sinon *)
 (* modif prend "l" pour lecture et "e" pour ecriture*)
 let rec analyse_tds_affectable tds a modif =
   match a with
+  | AstSyntax.TabInd (a, e) -> AstTds.TabInd (analyse_tds_affectable tds a modif, analyse_tds_expression tds e)
   | AstSyntax.Ident n -> (match chercherGlobalement tds n with
                           | Some ia -> (match info_ast_to_info ia with
                                         | InfoVar(_,_,_,_) -> AstTds.Ident(ia)
@@ -20,19 +28,13 @@ let rec analyse_tds_affectable tds a modif =
                           | None -> raise (IdentifiantNonDeclare n))
   | AstSyntax.Deref a -> AstTds.Deref (analyse_tds_affectable tds a modif)
 
-
-let rec affectable_info a = 
-  match a with 
-  | AstTds.Ident ia -> ia
-  | AstTds.Deref ia -> affectable_info ia
-
 (* analyse_tds_expression : tds -> AstSyntax.expression -> AstTds.expression *)
 (* Paramètre tds : la table des symboles courante *)
 (* Paramètre e : l'expression à analyser *)
 (* Vérifie la bonne utilisation des identifiants et tranforme l'expression
 en une expression de type AstTds.expression *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let rec analyse_tds_expression tds e = 
+and analyse_tds_expression tds e = 
   match e with 
   | AstSyntax.AppelFonction(nom, el) -> (match chercherGlobalement tds nom with 
                                           | None -> raise (IdentifiantNonDeclare nom)
@@ -52,6 +54,8 @@ let rec analyse_tds_expression tds e =
                             | Some ia -> (match info_ast_to_info ia with
                                           | InfoVar(_,_,_,_) -> AstTds.Adresse ia
                                           | _ -> raise (MauvaiseUtilisationIdentifiant n)))
+  | AstSyntax.ListeValeurs lv -> AstTds.ListeValeurs (List.map (analyse_tds_expression tds) lv)
+  | AstSyntax.NewTab (t, e) -> AstTds.NewTab (t, analyse_tds_expression tds e)
 
 (* analyse_tds_instruction : tds -> info_ast option -> AstSyntax.instruction -> AstTds.instruction *)
 (* Paramètre tds : la table des symboles courante *)

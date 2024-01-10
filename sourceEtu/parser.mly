@@ -68,6 +68,7 @@ param : t=typ n=ID  {(t,n)}
 bloc : AO li=i* AF      {li}
 
 a :
+| a1=a CO e1=e CF   {TabInd(a,e)}
 | MULT n=a  {Deref n}
 | n=ID      {Ident n}
 
@@ -83,18 +84,15 @@ i :
 
 typ :
 | t=typ MULT    {Pointer t}
+| t=typ CO CF   {Tab t}
 | BOOL    {Bool}
 | INT     {Int}
 | RAT     {Rat}
 
-typtab :
-| t=typ MULT    {Tableau t}
-| BOOL    {Bool}
-| INT     {Int}
-| RAT     {Rat}
 
 e : 
 | n=ID PO lp=separated_list(VIRG,e) PF   {AppelFonction (n,lp)}
+| AO lv=separated_list(VIRG,e) AF        {ListeValeurs (lv)}
 | CO e1=e SLASH e2=e CF   {Binaire(Fraction,e1,e2)}
 | n=a                     {Affectable n}
 | TRUE                    {Booleen true}
@@ -108,5 +106,6 @@ e :
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
 | PO exp=e PF             {exp}
 | NULL                    {Null}
+| NEW t=typ CO e1=e CF    {NewTab (t,e)}
 | NEW t=typ               {New t}
 | REF n=ID                {Adresse n}

@@ -121,15 +121,16 @@ let _ = compiler   (pathFichiersRat^"factrec.rat") in ()
 let%test_unit "testPointeur1" =
   let _ = compiler (pathFichiersRat^"testPointeur1.rat") in ()
 
-let%test_unit "testPointeur2" = 
-  try
-    let _ = compiler (pathFichiersRat^"testPointeur2.rat")
-    in raise ErreurNonDetectee
-  with
-  | IdentifiantNonDeclare("x") -> ()
+let%test_unit "testPointeur2" =
+  let _ = compiler (pathFichiersRat^"testPointeur2.rat") in ()
+
 
 let%test_unit "testPointeur3" =
-  let _ = compiler (pathFichiersRat^"testPointeur3.rat") in ()
+  try 
+    let _ = compiler (pathFichiersRat^"testPointeur3.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Int,Pointer(Int)) -> ()
 
 let%test_unit "testPointeur4" =
   let _ = compiler (pathFichiersRat^"testPointeur4.rat") in ()

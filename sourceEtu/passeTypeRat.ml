@@ -26,35 +26,6 @@ let get_type_info info =
   | InfoVar (_,t,_,_) -> t            (* Si c'est une variable, on renvoie son type *)
   | InfoFun (_,t,_) -> t              (* Si c'est une fonction, on renvoie son type *)
 
-
-(*
-  [analyse_type_affectable : AstTds.affectable -> typ * AstType.affectable]
-
-  Cette fonction analyse le type d'un affectable (variable ou déréférencement).
-
-  Paramètre :
-  - Affectable à analyser.
-
-  Résultat :
-  - Couple composé du type de l'affectable et de l'affectable transformé en AstType.
-  
-  Erreur :
-  - Si le type de l'affectable n'est pas conforme aux attentes, une exception de type "TypeInattendu" est levée.
-*)
-let rec analyse_type_affectable a =
-  match a with
-  | AstTds.Ident(ia) ->
-    (* Renvoie d'un couple composé du type de l'identifiant et du nouvel Ident *)
-    (get_type_info (info_ast_to_info ia), AstType.Ident(ia))
-  | AstTds.Deref da ->
-    (* Analyse de l'affectable *)
-    (* int * x -> Deref -> Ident(Int) *)
-    let (ta, nda) = analyse_type_affectable da in
-    (match ta with
-      | Pointer(typ) -> (typ, AstType.Deref(nda,typ))
-      | _ -> raise (TypeInattendu(ta,Pointer(Undefined))))
-
-
 (*
   [analyse_type_expression : AstType.expression -> typ]
 
@@ -116,6 +87,7 @@ let rec get_typ_expression e =
   | AstType.Null -> Pointer (Undefined)
   | AstType.Adresse info -> let t = get_type_info (info_ast_to_info info) in Pointer(t)
 
+
 (*
   [get_typ_list : AstType.expression list -> typ list]
 
@@ -131,6 +103,42 @@ let get_typ_list el = List.map (get_typ_expression) el
 
 
 (*
+  [analyse_type_affectable : AstTds.affectable -> typ * AstType.affectable]
+
+  Cette fonction analyse le type d'un affectable (variable ou déréférencement).
+
+  Paramètre :
+  - Affectable à analyser.
+
+  Résultat :
+  - Couple composé du type de l'affectable et de l'affectable transformé en AstType.
+  
+  Erreur :
+  - Si le type de l'affectable n'est pas conforme aux attentes, une exception de type "TypeInattendu" est levée.
+*)
+let rec analyse_type_affectable a =
+  match a with
+  | AstTds.Ident(ia) ->
+    (* Renvoie d'un couple composé du type de l'identifiant et du nouvel Ident *)
+    (get_type_info (info_ast_to_info ia), AstType.Ident(ia))
+  | AstTds.Deref da ->
+    (* Analyse de l'affectable *)
+    (* int * x -> Deref -> Ident(Int) *)
+    let (ta, nda) = analyse_type_affectable da in
+    (match ta with
+      | Pointer(typ) -> (typ, AstType.Deref(nda,typ))
+      | _ -> raise (TypeInattendu(ta,Pointer(Undefined))))
+      (* int [] a = ...*)
+  | AstTds.TabInd (a, e) -> let (ta, na) = analyse_type_affectable a in
+                            let ne = analyse_type_expression e in 
+                            let te = get_typ_expression ne in
+                            if te!=Int then raise  (TypeInattendu(te,Int))
+                            else (match ta with
+                                  | Tab(t) -> (ta, AstType.TabInd(na, ne))
+                                  | _ -> raise (TypeInattendu(ta,Tab(Undefined))))
+                            
+
+(*
   [analyse_type_expression : AstTds.expression -> AstType.expression]
 
   Cette fonction réalise l'analyse de type pour une expression AstTds.
@@ -141,7 +149,7 @@ let get_typ_list el = List.map (get_typ_expression) el
   Résultat :
   - Expression AstType correspondant à l'analyse de type de l'expression.
 *)
-let rec analyse_type_expression e = 
+and analyse_type_expression e = 
   match e with 
   | AstTds.AppelFonction(info, el) -> (* Récuération de la liste de expressions *)
                                       let el_n = List.map (analyse_type_expression) el in
@@ -189,6 +197,8 @@ let rec analyse_type_expression e =
   | AstTds.Null -> AstType.Null
   | AstTds.New t -> AstType.New t
   | AstTds.Adresse (info) -> AstType.Adresse (info)
+  | AstTds.NewTab (t, e) -> failwith "NewTab TODO"
+  | AstTds.ListeValeurs (el) -> failwith "ListeValeurs TODO"
   
 (*
   [affectable_to_info : AstTds.affectable -> Info_ast.info option]
@@ -206,7 +216,6 @@ let rec affectable_to_info a =
   match a with
   | AstTds.Ident(ia) -> 
       info_ast_to_info ia
-
   | AstTds.Deref da -> 
       affectable_to_info da
 

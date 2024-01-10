@@ -1,10 +1,7 @@
-int fonc (int * a) {
-    *x = 8;
-    return 0;
+int * fonc () {
+    return null;
 }
 
 main{
-    int * x = (new int);
-    int z = fonc (x);
-    print (*x);
+    int * x = fonc();
 }

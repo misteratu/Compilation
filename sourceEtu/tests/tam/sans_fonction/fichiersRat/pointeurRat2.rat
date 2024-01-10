@@ -1,0 +1,5 @@
+main {
+  rat b = 1/2;
+  int * a = &b;
+  print * a;
+}

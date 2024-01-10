@@ -1,0 +1,5 @@
+main {
+  bool b = false;
+  bool * a = &b;
+  print * a;
+}

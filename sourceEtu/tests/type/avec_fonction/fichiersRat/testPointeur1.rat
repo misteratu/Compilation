@@ -1,10 +1,11 @@
-int fonc (int * a) {
-    *a = 8;
-    return 0;
+int * free (int * a) {
+    int *x = a;
+    a = null;
+    return x;
 }
 
 main{
     int * x = (new int);
-    int z = fonc (x);
+    int * z = free (x);
     print (*x);
 }

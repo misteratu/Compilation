@@ -1,4 +1,4 @@
-int fonc (int * a) {
+int * fonc (int * a) {
     *a = 8;
     return 0;
 }

@@ -1,4 +1,4 @@
-type typ = Bool | Int | Rat | Undefined | Pointer of typ
+type typ = Bool | Int | Rat | Undefined | Pointer of typ | Tab of typ
 
 let rec string_of_type t = 
   match t with
@@ -6,6 +6,7 @@ let rec string_of_type t =
   | Int  ->  "Int"
   | Rat  ->  "Rat"
   | Pointer t -> "*"^string_of_type t
+  | Tab t -> "["^string_of_type t^"]"
   | Undefined -> "Undefined"
 
 
@@ -49,12 +50,13 @@ let%test _ = not (est_compatible_list [Int] [Rat ; Int])
 let%test _ = not (est_compatible_list [Int ; Rat] [Rat ; Int])
 let%test _ = not (est_compatible_list [Bool ; Rat ; Bool] [Bool ; Rat ; Bool ; Int])
 
-let getTaille t =
+let rec getTaille t =
   match t with
   | Int -> 1
   | Bool -> 1
   | Rat -> 2
   | Pointer _ -> 1
+  | Tab tTab -> getTaille tTab (* Dans le cas de tableaux de tableaux *)
   | Undefined -> 0
   
 let%test _ = getTaille Int = 1

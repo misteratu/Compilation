@@ -1,0 +1,4 @@
+pointeur{
+    rat z  = [5/4];
+    int * x = &z;
+}

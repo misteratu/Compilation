@@ -1,0 +1,9 @@
+int fonc (int * a) {
+    *a = 8;
+    return 0;
+}
+
+main{
+    int z = fonc (null);
+    int * x = null;
+}

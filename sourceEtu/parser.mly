@@ -39,6 +39,7 @@ open Ast.AstSyntax
 %token NEW
 %token NULL
 %token REF
+%token FOR
 
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
@@ -46,6 +47,7 @@ open Ast.AstSyntax
 %type <fonction> fonc
 %type <instruction> i
 %type <typ> typ
+%type <typ> typtab
 %type <typ*string> param
 %type <affectable> a
 %type <expression> e 
@@ -76,10 +78,17 @@ i :
 | PRINT e1=e PV                     {Affichage (e1)}
 | IF exp=e li1=bloc ELSE li2=bloc   {Conditionnelle (exp,li1,li2)}
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
-| RETURN exp=e PV                   {Retour (exp)}
+| RETURN exp=e PV                   {Retour (exp)} 
+(*| FOR PO id=ID EQUAL e1=e PV cond=e PV id=ID EQUAL e2=e PF li=bloc {BoucleFor (id, e1, cond, e2, li)}*)
 
 typ :
 | t=typ MULT    {Pointer t}
+| BOOL    {Bool}
+| INT     {Int}
+| RAT     {Rat}
+
+typtab :
+| t=typ MULT    {Tableau t}
 | BOOL    {Bool}
 | INT     {Int}
 | RAT     {Rat}

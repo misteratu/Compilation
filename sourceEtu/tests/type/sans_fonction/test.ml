@@ -382,7 +382,42 @@ let%test_unit "testOperation11"=
 let%test_unit "testOperation12"= 
   let _ = compiler (pathFichiersRat^"testOperation12.rat") in ()
 
+let%test_unit "testPointeur1" =
+  try
+    let _ = compiler (pathFichiersRat^"testPointeur1.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Rat,Int) -> ()
 
+let%test_unit "testPointeur2"= 
+  let _ = compiler (pathFichiersRat^"testPointeur2.rat") in ()
+
+let%test_unit "testPointeur3" =
+  try
+    let _ = compiler (pathFichiersRat^"testPointeur3.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Pointer(Rat),Pointer(Int)) -> ()
+
+let%test_unit "testPointeur4"= 
+  let _ = compiler (pathFichiersRat^"testPointeur4.rat") in ()
+
+let%test_unit "testPointeur5"= 
+  let _ = compiler (pathFichiersRat^"testPointeur5.rat") in ()
+
+let%test_unit "testPointeur6"= 
+  try
+    let _ = compiler (pathFichiersRat^"testPointeur6.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu (Int,Pointer(Int)) -> ()
+
+let%test_unit "testPointeur7"= 
+  try
+    let _ = compiler (pathFichiersRat^"testPointeur7.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu (Pointer(Undefined),Int) -> ()
 
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix

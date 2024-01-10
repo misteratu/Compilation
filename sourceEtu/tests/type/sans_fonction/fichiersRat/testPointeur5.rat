@@ -1,0 +1,5 @@
+pointeur{
+    int a = 10;
+    int *p = &a;
+    int **pp = &p;
+}

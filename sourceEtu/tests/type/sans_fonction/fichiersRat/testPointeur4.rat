@@ -1,0 +1,4 @@
+pointeur{
+    bool * p = (new bool);
+    *p = true;
+}

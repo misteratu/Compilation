@@ -48,10 +48,11 @@ let rec analyse_type_affectable a =
     (get_type_info (info_ast_to_info ia), AstType.Ident(ia))
   | AstTds.Deref da ->
     (* Analyse de l'affectable *)
+    (* int * x -> Deref -> Ident(Int) *)
     let (ta, nda) = analyse_type_affectable da in
-    match ta with
-    | Pointer(t) -> (t, AstType.Deref(nda, t))
-    | _ -> raise (TypeInattendu(ta, Pointer(Undefined)))
+    (match ta with
+      | Pointer(typ) -> (typ, AstType.Deref(nda,typ))
+      | _ -> raise (TypeInattendu(ta,Pointer(Undefined))))
 
 
 (*
@@ -71,14 +72,12 @@ let rec analyse_type_affectable a =
 let rec get_typ_expression e = 
   (* Analyse de l'expression *)
   match e with
-  | AstType.Affectable (a) -> (match a with 
-                            | AstType.Ident id -> let inf = info_ast_to_info id in
-                                                    (match inf with
-                                                    | InfoConst (_,_) -> Int  (* Si c'est une constante alors cela est forcément un entier *)
-                                                    | InfoVar (_,t,_,_) -> t  (* Si c'est une variable, on renvoie son type *)
-                                                    | _ -> failwith "Ident pour fonction")
-                            | AstType.Deref (_, t) -> t
-                            )
+  | AstType.Affectable (a) -> (match a with
+                              | AstType.Ident(ia) ->
+                                (* Renvoie d'un couple composé du type de l'identifiant et du nouvel Ident *)
+                                get_type_info (info_ast_to_info ia)
+                              | AstType.Deref (_, t) -> t
+                                )
   | AstType.Booleen _-> Bool 
   | AstType.Entier _-> Int
   | AstType.Unaire (op,exp) -> (match exp with
@@ -115,7 +114,7 @@ let rec get_typ_expression e =
                                       | _ -> failwith "Non InfoFun pour fonction")
   | AstType.New t -> Pointer t
   | AstType.Null -> Pointer (Undefined)
-  | AstType.Adresse info -> get_type_info (info_ast_to_info info)
+  | AstType.Adresse info -> let t = get_type_info (info_ast_to_info info) in Pointer(t)
 
 (*
   [get_typ_list : AstType.expression list -> typ list]
@@ -238,7 +237,7 @@ let rec analyse_type_instruction i =
       (* Vérification de la compatibilité des types *)
       if est_compatible t te then
         (* Ajout de la variable à la tds *)
-        (modifier_type_variable te n;
+        (modifier_type_variable t n;
          AstType.Declaration (n, ne))
       else 
         raise (TypeInattendu (te,t))
@@ -249,14 +248,9 @@ let rec analyse_type_instruction i =
       (* Récupération du type associé à l'expression *)
       let te = get_typ_expression ne in
       (* Récupération de l'information associée à l'affectable *)
-      let (_, a) = analyse_type_affectable info in
-      (match affectable_to_info info with
-      | InfoConst (_, _) -> if est_compatible Int te then AstType.Affectation (a, ne)
-                            else raise (TypeInattendu (te,Int))
-      | InfoVar (_, t, _, _) -> if est_compatible t te then AstType.Affectation (a, ne)
-                                else raise (TypeInattendu (te,t))
-      | InfoFun (_, t, _) -> if est_compatible t te then AstType.Affectation (a, ne)
-                             else raise (TypeInattendu (te,t)))
+      let (t, a) = analyse_type_affectable info in
+      if est_compatible t te then AstType.Affectation (a, ne) 
+      else raise (TypeInattendu (te, t));
 
   | AstTds.Affichage e ->
       (* Analyse de l'expression *)

@@ -1,0 +1,10 @@
+int fonc (int * a) {
+    *a = 8;
+    return 0;
+}
+
+main{
+    int * x = (new int);
+    int z = fonc (x);
+    print (*x);
+}

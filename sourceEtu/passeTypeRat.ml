@@ -48,6 +48,7 @@ let rec get_typ_expression e =
                                 (* Renvoie d'un couple composé du type de l'identifiant et du nouvel Ident *)
                                 get_type_info (info_ast_to_info ia)
                               | AstType.Deref (_, t) -> t
+                              | AstType.TabInd (_, e) -> get_typ_expression e
                                 )
   | AstType.Booleen _-> Bool 
   | AstType.Entier _-> Int
@@ -66,7 +67,9 @@ let rec get_typ_expression e =
                                                                                                   else raise  (TypeInattendu (t,Rat))
                                                                                 )
                                                           | AstType.Deref (_, t) -> t
+                                                          | AstType.TabInd (_, e) -> get_typ_expression e
                                                           )
+                                                          
                                 | _ -> raise (TypeInattendu(get_typ_expression exp,Rat))
                                 )
   | AstType.Binaire (op,_,_) -> (* Gestions de toutes les opérations possibles *)
@@ -86,6 +89,8 @@ let rec get_typ_expression e =
   | AstType.New t -> Pointer t
   | AstType.Null -> Pointer (Undefined)
   | AstType.Adresse info -> let t = get_type_info (info_ast_to_info info) in Pointer(t)
+  | AstType.NewTab (t,_) -> Tab t
+  | AstType.ListeValeurs (el) -> failwith "To do"
 
 
 (*
@@ -134,7 +139,7 @@ let rec analyse_type_affectable a =
                             let te = get_typ_expression ne in
                             if te!=Int then raise  (TypeInattendu(te,Int))
                             else (match ta with
-                                  | Tab(t) -> (ta, AstType.TabInd(na, ne))
+                                  | Tab(ti) -> (ta, AstType.TabInd(na, ne))
                                   | _ -> raise (TypeInattendu(ta,Tab(Undefined))))
                             
 

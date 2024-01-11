@@ -39,7 +39,7 @@ open Ast.AstSyntax
 %token NEW
 %token NULL
 %token REF
-%token FOR
+(*%token FOR*)
 
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
@@ -47,7 +47,6 @@ open Ast.AstSyntax
 %type <fonction> fonc
 %type <instruction> i
 %type <typ> typ
-%type <typ> typtab
 %type <typ*string> param
 %type <affectable> a
 %type <expression> e 
@@ -68,7 +67,7 @@ param : t=typ n=ID  {(t,n)}
 bloc : AO li=i* AF      {li}
 
 a :
-| a1=a CO e1=e CF   {TabInd(a,e)}
+| a1=a CO e1=e CF   {TabInd(a1, e1)}
 | MULT n=a  {Deref n}
 | n=ID      {Ident n}
 
@@ -104,8 +103,7 @@ e :
 | PO e1=e MULT e2=e PF    {Binaire (Mult,e1,e2)}
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
-| PO exp=e PF             {exp}
 | NULL                    {Null}
-| NEW t=typ CO e1=e CF    {NewTab (t,e)}
+| NEW t=typ CO e1=e CF    {NewTab (t,e1)}
 | NEW t=typ               {New t}
 | REF n=ID                {Adresse n}

@@ -90,7 +90,9 @@ let rec get_typ_expression e =
   | AstType.Null -> Pointer (Undefined)
   | AstType.Adresse info -> let t = get_type_info (info_ast_to_info info) in Pointer(t)
   | AstType.NewTab (t,_) -> Tab t
-  | AstType.ListeValeurs (el) -> failwith "To do"
+  | AstType.ListeValeurs (el) -> let tl = List.map get_typ_expression el in
+                                 if est_compatible_list tl tl then Tab (List.hd tl)
+                                 else raise (TypesParametresInattendus (tl,tl))
 
 
 (*
@@ -139,7 +141,7 @@ let rec analyse_type_affectable a =
                             let te = get_typ_expression ne in
                             if te!=Int then raise  (TypeInattendu(te,Int))
                             else (match ta with
-                                  | Tab(ti) -> (ta, AstType.TabInd(na, ne))
+                                  | Tab(tt) -> (tt, AstType.TabInd(na, ne))
                                   | _ -> raise (TypeInattendu(ta,Tab(Undefined))))
                             
 
@@ -202,8 +204,8 @@ and analyse_type_expression e =
   | AstTds.Null -> AstType.Null
   | AstTds.New t -> AstType.New t
   | AstTds.Adresse (info) -> AstType.Adresse (info)
-  | AstTds.NewTab (t, e) -> failwith "NewTab TODO"
-  | AstTds.ListeValeurs (el) -> failwith "ListeValeurs TODO"
+  | AstTds.NewTab (t, e) -> AstType.NewTab (t, analyse_type_expression e)
+  | AstTds.ListeValeurs (el) -> AstType.ListeValeurs (List.map (analyse_type_expression) el)
   
 (*
   [affectable_to_info : AstTds.affectable -> Info_ast.info option]
@@ -223,6 +225,7 @@ let rec affectable_to_info a =
       info_ast_to_info ia
   | AstTds.Deref da -> 
       affectable_to_info da
+  | _ -> failwith "Erreur dans l'affectable_to_info"
 
 
 (*

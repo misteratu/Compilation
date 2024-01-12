@@ -135,6 +135,19 @@ let%test_unit "testPointeur3" =
 let%test_unit "testPointeur4" =
   let _ = compiler (pathFichiersRat^"testPointeur4.rat") in ()
 
+let%test_unit "testFuncBoucle1" =
+  let _ = compiler (pathFichiersRat^"testFuncBoucle1.rat") in ()
+
+let%test_unit "testFuncBoucle2" =
+  try 
+    let _ = compiler (pathFichiersRat^"testFuncBoucle2.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Int,Rat) -> ()
+
+  let%test_unit "testFuncBoucle3" =
+  let _ = compiler (pathFichiersRat^"testFuncBoucle3.rat") in ()
+
 
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix

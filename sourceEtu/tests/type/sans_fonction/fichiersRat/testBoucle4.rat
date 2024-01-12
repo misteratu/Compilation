@@ -1,0 +1,7 @@
+main{
+    int y = 0;
+    rat z = [3/4];
+    for (int x = 0 ; (x < 5) ; x = (x+z)) {
+    y = (x+1);
+    }
+}

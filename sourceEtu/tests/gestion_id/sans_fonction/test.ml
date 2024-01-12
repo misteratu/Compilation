@@ -160,6 +160,20 @@ let%test_unit "testConstante" =
   with
   | MauvaiseUtilisationIdentifiant("a") -> ()
 
+let%test_unit "testBoucle1" = 
+  let _ = compiler (pathFichiersRat^"testBoucle1.rat") in ()
+
+let%test_unit "testBoucle2" = 
+  try
+    let _ = compiler (pathFichiersRat^"testBoucle2.rat") 
+    in raise ErreurNonDetectee
+  with
+  | MauvaiseUtilisationIdentifiant("a") -> ()
+
+let%test_unit "testBoucle3" = 
+  let _ = compiler (pathFichiersRat^"testBoucle3.rat") in ()
+
+
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix
 open Filename

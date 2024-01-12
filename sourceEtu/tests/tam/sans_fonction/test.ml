@@ -120,3 +120,15 @@ let%expect_test "pointeurRat" =
 let%expect_test "pointeurRat2" =
   runtam (pathFichiersRat^"PointeurRat2.rat");
   [%expect{| [1/2] |}]
+
+let%expect_test "testBoucle1" =
+  runtam (pathFichiersRat^"testBoucle1.rat");
+  [%expect{| 5 |}]
+
+let%expect_test "testBoucle2" =
+  runtam (pathFichiersRat^"testBoucle2.rat");
+  [%expect{| 15 |}]
+
+let%expect_test "testBoucle3" =
+  runtam (pathFichiersRat^"testBoucle3.rat");
+  [%expect{| 120 |}]

@@ -1,0 +1,7 @@
+main{
+    int y = 20;
+    for (int x = 0 ; (x < 5) ; x = (x+1)) {
+    y = y - 1;
+    }
+    print(y);
+}

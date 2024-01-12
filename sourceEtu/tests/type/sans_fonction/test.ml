@@ -419,6 +419,26 @@ let%test_unit "testPointeur7"=
   with
   | TypeInattendu (Pointer(Undefined),Int) -> ()
 
+let%test_unit "testBoucle1"= 
+  let _ = compiler (pathFichiersRat^"testBoucle1.rat") in ()
+
+let%test_unit "testBoucle2"= 
+  try
+    let _ = compiler (pathFichiersRat^"testBoucle2.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu (Pointer(Undefined),Int) -> ()
+
+let%test_unit "testBoucle3"= 
+  let _ = compiler (pathFichiersRat^"testBoucle3.rat") in ()
+
+let%test_unit "testBoucle4"= 
+  try
+    let _ = compiler (pathFichiersRat^"testBoucle4.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu (Pointer(Undefined),Int) -> ()
+
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix
 open Filename

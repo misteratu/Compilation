@@ -137,8 +137,8 @@ struct
     | Retour of expression * Tds.info_ast  (* les informations sur la fonction à laquelle est associé le retour *)
     | Empty (* les nœuds ayant disparus: Const *)
     | For of expression * expression * expression * bloc   
-    | Goto of string
-    | Label of string
+    | Goto of Tds.info_ast
+    | Label of Tds.info_ast
 
   (* Structure des fonctions dans notre langage *)
   (* type de retour - informations associées à l'identificateur (dont son nom) - liste des paramètres (association type et information sur les paramètres) - corps de la fonction *)
@@ -200,8 +200,8 @@ type bloc = instruction list
   | Retour of expression * Tds.info_ast
   | Empty (* les nœuds ayant disparus: Const *)
   | For of expression * expression * expression * bloc
-  | Goto of string
-  | Label of string
+  | Goto of Tds.info_ast
+  | Label of Tds.info_ast
 
 (* informations associées à l'identificateur (dont son nom), liste des paramètres, corps *)
 type fonction = Fonction of Tds.info_ast * Tds.info_ast list * bloc
@@ -236,8 +236,8 @@ type bloc = instruction list * int (* taille du bloc *)
  | Retour of expression * int * int (* taille du retour et taille des paramètres *)
  | Empty (* les nœuds ayant disparus: Const *)
  | For of expression * expression * expression * bloc
- | Goto of string
- | Label of string
+ | Goto of Tds.info_ast
+ | Label of Tds.info_ast
 
 (* informations associées à l'identificateur (dont son nom), liste de paramètres, corps, expression de retour *)
 (* Plus besoin de la liste des paramètres mais on la garde pour les tests du placements mémoire *)

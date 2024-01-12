@@ -324,8 +324,8 @@ let rec analyse_type_instruction i =
            let nb = analyse_type_bloc b in
            AstType.For (ne1, ne2, ne3, nb)
        | _ -> raise (TypeInattendu (te1, Int)))
-  | AstTds.Goto (s) -> AstType.Goto (s)
-  | AstTds.Label (s) -> AstType.Label (s)
+  | AstTds.Goto (is) -> AstType.Goto (is)
+  | AstTds.Label (is) -> AstType.Label (is)
 
 
 

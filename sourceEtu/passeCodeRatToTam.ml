@@ -49,9 +49,17 @@ let rec analyse_code_affectable a mode deref =
              storei taille
            else
              loadi taille)
+  | AstType.TabInd (a, e, t) -> 
+    let res = analyse_code_affectable a "e" false in
+    let res2 = analyser_code_expression e in
+    res ^ res2 ^ loadl_int (getTaille (t)) ^ subr "IMul" ^ subr "IAdd" ^
+    (if mode = "e" && not deref then
+       storei (getTaille (t))
+     else
+       loadi (getTaille (t)))
+    
 
-
-let rec analyser_code_expression e = 
+and analyser_code_expression e = 
   match e with
   | AstType.AppelFonction (info, l) ->  (match info_ast_to_info info with
                                           | InfoFun(nom,_,_) ->  String.concat "" (List.map analyser_code_expression l) ^
@@ -83,6 +91,9 @@ let rec analyser_code_expression e =
   | AstType.Adresse(infoa) -> (match info_ast_to_info infoa with
                                 | InfoVar(_,_,d,reg) -> loada  d reg
                                 | _ -> failwith "Impossible")
+  | AstType.ListeValeurs(l) -> String.concat "" (List.map analyser_code_expression l)
+  | AstType.NewTab(t, e) -> let res = analyser_code_expression e in
+                            res ^ loadl_int (getTaille t) ^ subr "IMul" ^ subr "MAlloc"
 
 
 let rec analyser_code_bloc b = 
@@ -94,7 +105,9 @@ and analyser_code_instruction i =
   match i with 
   | AstPlacement.Declaration (inf,expr) -> let res = analyser_code_expression expr in
                                             (match info_ast_to_info inf with
-                                            | InfoVar(_,t,d,reg) ->  push (getTaille t) ^ res ^ store (getTaille t) d reg
+                                            | InfoVar(_,t,d,reg) ->  (match res with
+                                                                      | AstType.ListeValeurs l -> 
+                                                                      | _ -> push (getTaille t) ^ res ^ store (getTaille t) d reg)
                                             | _ -> failwith "impossible")
   | AstPlacement.Affectation (a,expr) ->  analyser_code_expression expr ^ analyse_code_affectable a "e" false
   | AstPlacement.AffichageInt expr -> analyser_code_expression expr ^ subr "IOut"
@@ -121,6 +134,23 @@ and analyser_code_instruction i =
                                         
   | AstPlacement.Retour (expr,taille_ret,taille_param) -> analyser_code_expression expr ^ return taille_ret taille_param
   | AstPlacement.Empty -> ""
+  | AstPlacement.For (e1, e2, e3, b) -> let debut = getEtiquette() in
+                                        let condition = getEtiquette() in
+                                        let fin = getEtiquette() in
+
+                                        analyser_code_expression e1 ^
+                                        label debut ^
+                                        analyser_code_expression e2 ^
+                                        jumpif 0 fin ^
+                                        label condition ^
+                                        analyser_code_bloc b ^
+                                        analyser_code_expression e3 ^
+                                        jump debut ^
+                                        label fin
+  | AstPlacement.Goto (s) -> jump s
+  | AstPlacement.Label (s) -> let etiq = getEtiquette() in
+                              label etiq ^
+                              label s
 
 
 

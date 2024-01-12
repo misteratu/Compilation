@@ -144,7 +144,9 @@ let rec analyse_tds_instruction tds oia i =
         let ne = analyse_tds_expression tds e in
         AstTds.Retour (ne,ia)
       end
-
+      | AstSyntax.For (e1, e2, e3, b) -> AstTds.For (analyse_tds_expression tds e1, analyse_tds_expression tds e2, analyse_tds_expression tds e3, analyse_tds_bloc tds None b)
+      | AstSyntax.Goto (n) -> AstTds.Goto (n)
+      | AstSyntax.Label (n) -> AstTds.Label (n)
 
 (* analyse_tds_bloc : tds -> info_ast option -> AstSyntax.bloc -> AstTds.bloc *)
 (* Paramètre tds : la table des symboles courante *)

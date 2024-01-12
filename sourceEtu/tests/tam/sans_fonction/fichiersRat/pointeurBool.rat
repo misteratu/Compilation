@@ -1,4 +1,5 @@
 main {
-  bool * a = true;
+  bool * a = (new Bool);
+  *a = true;
   print * a;
 }

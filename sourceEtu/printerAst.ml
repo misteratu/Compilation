@@ -55,8 +55,9 @@ struct
   match a with
   | Ident n -> n^" "
   | Deref a -> "*"^string_of_affectable a
+  | TabInd (a, e) -> (string_of_affectable a) ^ "[" ^ (string_of_expression e) ^ "] "
 
-  let rec string_of_expression e =
+  and string_of_expression e =
     match e with
     | AppelFonction (n,le) -> "call "^n^"("^((List.fold_right (fun i tq -> (string_of_expression i)^tq) le ""))^") "
     | Affectable a -> string_of_affectable a
@@ -72,6 +73,8 @@ struct
     | Null -> "Null"
     | New t -> "New "^string_of_type t
     | Adresse n -> "&"^n
+    | ListeValeurs le -> "{" ^ String.concat "," (List.map string_of_expression le) ^ "}"
+    | NewTab (t, e) -> "New " ^ (string_of_type t) ^ "[" ^ (string_of_expression e) ^ "]"
 
   (* Conversion des instructions *)
   let rec string_of_instruction i =
@@ -86,6 +89,11 @@ struct
     | TantQue (c,b) -> "TantQue  : TQ "^(string_of_expression c)^"\n"^
                                   "FAIRE \n"^((List.fold_right (fun i tq -> (string_of_instruction i)^tq) b ""))^"\n"
     | Retour (e) -> "Retour  : RETURN "^(string_of_expression e)^"\n"
+    | For (e1, e2, e3, b) ->
+      "Pour (" ^ (string_of_expression e1) ^ " ; " ^
+      (string_of_expression e2) ^ " ; " ^ (string_of_expression e3) ^ "\n" ^
+      "FAIRE \n" ^ ((List.fold_right (fun i tq -> (string_of_instruction i)^tq) b ""))^"\n"
+    
 
   (* Conversion des fonctions *)
   let string_of_fonction (Fonction(t,n,lp,li)) = (string_of_type t)^" "^n^" ("^((List.fold_right (fun (t,n) tq -> (string_of_type t)^" "^n^" "^tq) lp ""))^") = \n"^

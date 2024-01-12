@@ -48,7 +48,7 @@ let rec get_typ_expression e =
                                 (* Renvoie d'un couple composé du type de l'identifiant et du nouvel Ident *)
                                 get_type_info (info_ast_to_info ia)
                               | AstType.Deref (_, t) -> t
-                              | AstType.TabInd (_, e) -> get_typ_expression e
+                              | AstType.TabInd (_, _, t) -> t
                                 )
   | AstType.Booleen _-> Bool 
   | AstType.Entier _-> Int
@@ -67,7 +67,7 @@ let rec get_typ_expression e =
                                                                                                   else raise  (TypeInattendu (t,Rat))
                                                                                 )
                                                           | AstType.Deref (_, t) -> t
-                                                          | AstType.TabInd (_, e) -> get_typ_expression e
+                                                          | AstType.TabInd (_, _, t) -> t
                                                           )
                                                           
                                 | _ -> raise (TypeInattendu(get_typ_expression exp,Rat))
@@ -141,7 +141,7 @@ let rec analyse_type_affectable a =
                             let te = get_typ_expression ne in
                             if te!=Int then raise  (TypeInattendu(te,Int))
                             else (match ta with
-                                  | Tab(tt) -> (tt, AstType.TabInd(na, ne))
+                                  | Tab(tt) -> (tt, AstType.TabInd(na, ne, tt))
                                   | _ -> raise (TypeInattendu(ta,Tab(Undefined))))
                             
 
@@ -312,6 +312,20 @@ let rec analyse_type_instruction i =
        | _ -> failwith "Erreur dans le retour")
 
   | AstTds.Empty -> AstType.Empty
+  | AstTds.For (e1, e2, e3, b) ->
+      (let ne1 = analyse_type_expression e1 in
+       let ne2 = analyse_type_expression e2 in
+       let ne3 = analyse_type_expression e3 in
+       let te1 = get_typ_expression ne1 in
+       let te2 = get_typ_expression ne2 in
+       let te3 = get_typ_expression ne3 in
+       match te1, te2, te3 with
+       | Int, Bool, Int ->
+           let nb = analyse_type_bloc b in
+           AstType.For (ne1, ne2, ne3, nb)
+       | _ -> raise (TypeInattendu (te1, Int)))
+  | AstTds.Goto (s) -> AstType.Goto (s)
+  | AstTds.Label (s) -> AstType.Label (s)
 
 
 

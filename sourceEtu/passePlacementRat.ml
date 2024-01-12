@@ -104,7 +104,9 @@ and analyser_placement_instruction i depl reg =
   | AstType.Empty -> 
       (* Renvoie une instruction vide avec une taille nulle. *)
       (AstPlacement.Empty, 0)
-
+  | AstType.For (e1, e2, e3, b) -> (AstPlacement.For(e1, e2, e3, analyser_placement_bloc b depl reg), 0)
+  | AstType.Goto (s) -> (AstPlacement.Goto(s), 0)
+  | AstType.Label (s) -> (AstPlacement.Label(s), 0)
 
 (*
   [analyser_placement_fonction : AstType.fonction -> AstPlacement.fonction]

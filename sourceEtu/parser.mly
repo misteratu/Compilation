@@ -39,6 +39,9 @@ open Ast.AstSyntax
 %token NEW
 %token NULL
 %token REF
+%token FOR
+%token GOTO
+%token DP
 
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
@@ -78,6 +81,9 @@ i :
 | IF exp=e li1=bloc ELSE li2=bloc   {Conditionnelle (exp,li1,li2)}
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
+| FOR PO e1=e PV e2=e PV e3=e PF li=bloc  {For (e1,e2,e3,li)}
+| GOTO n=ID PV                      {Goto n}
+| n=ID DP                           {Label n}
 
 typ :
 | t=typ MULT    {Pointer t}

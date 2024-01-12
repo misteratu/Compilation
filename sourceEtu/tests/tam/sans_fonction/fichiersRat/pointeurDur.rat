@@ -1,6 +1,6 @@
 main {
   int x = 10;
   int *p1 = &x;
-  int **p2 = &p1 + 20;
+  int **p2 = &p1;
   print **p2;
 }

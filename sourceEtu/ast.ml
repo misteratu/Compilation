@@ -73,7 +73,11 @@ and instruction =
   (* return d'une fonction *)
   | Retour of expression
   (* Boucle For *)
-  (* | For of string * expression * expression * expression * bloc *)
+  | For of expression * expression * expression * bloc 
+  (* Goto *)
+  | Goto of string
+  (* Label *)
+  | Label of string
 
 
 (* Structure des fonctions de Rat *)
@@ -132,7 +136,9 @@ struct
     | TantQue of expression * bloc
     | Retour of expression * Tds.info_ast  (* les informations sur la fonction à laquelle est associé le retour *)
     | Empty (* les nœuds ayant disparus: Const *)
-
+    | For of expression * expression * expression * bloc   
+    | Goto of string
+    | Label of string
 
   (* Structure des fonctions dans notre langage *)
   (* type de retour - informations associées à l'identificateur (dont son nom) - liste des paramètres (association type et information sur les paramètres) - corps de la fonction *)
@@ -158,7 +164,7 @@ type binaire = Fraction | PlusInt | PlusRat | MultInt | MultRat | EquInt | EquBo
 
 (* Affectable apres ajout pointeurs *)
 type affectable =
-  | TabInd of affectable * expression
+  | TabInd of affectable * expression * typ
   (* Identifiant représenté par son nom *)
   | Ident of Tds.info_ast
   (* Dereferencement d'un identifiant *)
@@ -193,6 +199,9 @@ type bloc = instruction list
   | TantQue of expression * bloc
   | Retour of expression * Tds.info_ast
   | Empty (* les nœuds ayant disparus: Const *)
+  | For of expression * expression * expression * bloc
+  | Goto of string
+  | Label of string
 
 (* informations associées à l'identificateur (dont son nom), liste des paramètres, corps *)
 type fonction = Fonction of Tds.info_ast * Tds.info_ast list * bloc
@@ -226,6 +235,9 @@ type bloc = instruction list * int (* taille du bloc *)
  | TantQue of expression * bloc
  | Retour of expression * int * int (* taille du retour et taille des paramètres *)
  | Empty (* les nœuds ayant disparus: Const *)
+ | For of expression * expression * expression * bloc
+ | Goto of string
+ | Label of string
 
 (* informations associées à l'identificateur (dont son nom), liste de paramètres, corps, expression de retour *)
 (* Plus besoin de la liste des paramètres mais on la garde pour les tests du placements mémoire *)

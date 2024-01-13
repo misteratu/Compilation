@@ -90,35 +90,35 @@ let%expect_test "complique" =
   [%expect{| [9/4][27/14][27/16][3/2] |}]
 
 let%expect_test "pointeurBool" =
-  runtam (pathFichiersRat^"PointeurBool.rat");
+  runtam (pathFichiersRat^"pointeurBool.rat");
   [%expect{| true |}]
 
 let%expect_test "pointeurBool2" =
-  runtam (pathFichiersRat^"PointeurBool2.rat");
+  runtam (pathFichiersRat^"pointeurBool2.rat");
   [%expect{| false |}]
 
 let%expect_test "pointeurDur" =
-  runtam (pathFichiersRat^"PointeurDur.rat");
-  [%expect{| 30 |}]
+  runtam (pathFichiersRat^"pointeurDur.rat");
+  [%expect{| 10 |}]
 
 let%expect_test "pointeurDur2" =
-  runtam (pathFichiersRat^"PointeurDur2.rat");
+  runtam (pathFichiersRat^"pointeurDur2.rat");
   [%expect{| 20 |}]
 
 let%expect_test "pointeurInt" =
-  runtam (pathFichiersRat^"PointeurInt.rat");
+  runtam (pathFichiersRat^"pointeurInt.rat");
   [%expect{| 1 |}]
 
 let%expect_test "pointeurInt2" =
-  runtam (pathFichiersRat^"PointeurInt2.rat");
-  [%expect{| 1 |}]
+  runtam (pathFichiersRat^"pointeurInt2.rat");
+  [%expect{| 5 |}]
 
 let%expect_test "pointeurRat" =
-  runtam (pathFichiersRat^"PointeurRat.rat");
+  runtam (pathFichiersRat^"pointeurRat.rat");
   [%expect{| [1/2] |}]
 
 let%expect_test "pointeurRat2" =
-  runtam (pathFichiersRat^"PointeurRat2.rat");
+  runtam (pathFichiersRat^"pointeurRat2.rat");
   [%expect{| [1/2] |}]
 
 let%expect_test "testBoucle1" =

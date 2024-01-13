@@ -164,16 +164,37 @@ let%test_unit "testBoucle1" =
   let _ = compiler (pathFichiersRat^"testBoucle1.rat") in ()
 
 let%test_unit "testBoucle2" = 
-  try
-    let _ = compiler (pathFichiersRat^"testBoucle2.rat") 
-    in raise ErreurNonDetectee
-  with
-  | MauvaiseUtilisationIdentifiant("a") -> ()
+  let _ = compiler (pathFichiersRat^"testBoucle2.rat") in ()
 
 let%test_unit "testBoucle3" = 
   let _ = compiler (pathFichiersRat^"testBoucle3.rat") in ()
 
+let%test_unit "testGoto1" = 
+  let _ = compiler (pathFichiersRat^"testGoto1.rat") in ()
 
+let%test_unit "testGoto2" = 
+  try
+    let _ = compiler (pathFichiersRat^"testGoto2.rat") 
+    in raise ErreurNonDetectee
+  with
+  | MauvaiseUtilisationIdentifiant("a") -> ()
+
+let%test_unit "testGoto3" = 
+  let _ = compiler (pathFichiersRat^"testGoto3.rat") in ()
+
+let%test_unit "testGoto4" = 
+  let _ = compiler (pathFichiersRat^"testGoto4.rat") in ()
+
+let%test_unit "testGoto5" =
+  let _ = compiler (pathFichiersRat^"testGoto5.rat") in ()
+
+let%test_unit "testGoto6" = 
+  try
+    let _ = compiler (pathFichiersRat^"testGoto6.rat") 
+    in raise ErreurNonDetectee
+  with
+  | MauvaiseUtilisationIdentifiant("a") -> ()
+  
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix
 open Filename

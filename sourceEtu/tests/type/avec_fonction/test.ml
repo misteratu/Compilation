@@ -143,10 +143,14 @@ let%test_unit "testFuncBoucle2" =
     let _ = compiler (pathFichiersRat^"testFuncBoucle2.rat")
     in raise ErreurNonDetectee
   with
-  | TypeInattendu(Int,Rat) -> ()
+  | TypeBinaireInattendu(Inf, Int, Rat) -> ()
 
-  let%test_unit "testFuncBoucle3" =
-  let _ = compiler (pathFichiersRat^"testFuncBoucle3.rat") in ()
+let%test_unit "testFuncBoucle3" =
+  try 
+    let _ = compiler (pathFichiersRat^"testFuncBoucle3.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Int,Rat) -> ()
 
 
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)

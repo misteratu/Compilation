@@ -1,0 +1,15 @@
+main {
+int i = 3 ;
+goto etiq ;
+while (i < 10) {
+    int x = 5 ;
+    print x ;
+    etiq :
+    int a = 7;
+    print a;
+    goto fin;
+}
+fin :
+int j = 6;
+print j;
+}

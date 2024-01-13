@@ -89,10 +89,12 @@ struct
     | TantQue (c,b) -> "TantQue  : TQ "^(string_of_expression c)^"\n"^
                                   "FAIRE \n"^((List.fold_right (fun i tq -> (string_of_instruction i)^tq) b ""))^"\n"
     | Retour (e) -> "Retour  : RETURN "^(string_of_expression e)^"\n"
-    | For (e1, e2, e3, b) ->
-      "Pour (" ^ (string_of_expression e1) ^ " ; " ^
-      (string_of_expression e2) ^ " ; " ^ (string_of_expression e3) ^ "\n" ^
+    | For (i1, e2, a, e3, b) ->
+      "Pour (" ^ (string_of_instruction i1) ^ " ; " ^
+      (string_of_expression e2) ^ " ; " ^ string_of_affectable a ^ (string_of_expression e3) ^ "\n" ^
       "FAIRE \n" ^ ((List.fold_right (fun i tq -> (string_of_instruction i)^tq) b ""))^"\n"
+    | Goto (n) -> "Goto " ^ n
+    | Label (n) -> "Label " ^ n
     
 
   (* Conversion des fonctions *)

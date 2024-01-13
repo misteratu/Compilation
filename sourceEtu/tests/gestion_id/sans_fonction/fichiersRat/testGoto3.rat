@@ -1,0 +1,12 @@
+main {
+const a = 40;
+if (a < 5) {
+    goto suite;
+} else {
+    goto fin;
+}
+suite :
+int x = (a + 4);
+fin :
+print x;
+}

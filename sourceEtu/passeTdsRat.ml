@@ -144,7 +144,19 @@ let rec analyse_tds_instruction tds oia i =
         let ne = analyse_tds_expression tds e in
         AstTds.Retour (ne,ia)
       end
-  | AstSyntax.For (e1, e2, e3, b) -> AstTds.For (analyse_tds_expression tds e1, analyse_tds_expression tds e2, analyse_tds_expression tds e3, analyse_tds_bloc tds None b)
+  | AstSyntax.For (i1, e2, a, e3, b) -> let ni1 = (match i1 with
+                                        | AstSyntax.Declaration _ -> analyse_tds_instruction tds oia i1
+                                        | _ -> failwith "Mauvaise declaration") in
+    
+    
+                                        let ne2 = (match e2 with
+                                        | AstSyntax.Booleen _ -> analyse_tds_expression tds e2
+                                        | AstSyntax.Binaire (op, _, _) -> if op == AstSyntax.Equ || op == AstSyntax.Inf then
+                                          analyse_tds_expression tds e2 else raise (MauvaiseUtilisationIdentifiant "for")
+                                        | AstSyntax.Affectable _ -> analyse_tds_expression tds e2
+                                        | _ -> failwith "Mauvaise condirion d'arret") in
+
+    AstTds.For (ni1, ne2, analyse_tds_affectable tds a "e", analyse_tds_expression tds e3, analyse_tds_bloc tds None b)
   | AstSyntax.Goto (n) -> (match chercherGlobalement tds n with
                               | None -> let info = info_to_info_ast (InfoEtiq(n)) in 
                                         ajouter tds n info;

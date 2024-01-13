@@ -104,7 +104,9 @@ and analyser_placement_instruction i depl reg =
   | AstType.Empty -> 
       (* Renvoie une instruction vide avec une taille nulle. *)
       (AstPlacement.Empty, 0)
-  | AstType.For (e1, e2, e3, b) -> (AstPlacement.For(e1, e2, e3, analyser_placement_bloc b depl reg), 0)
+  | AstType.For (i1, e2, info, e3, b) -> (match (analyser_placement_instruction i1 depl reg) with
+                                    | (i, _) -> let nb = analyser_placement_bloc b depl reg in
+                                                (AstPlacement.For(i, e2, info, e3, nb), 0))
   | AstType.Goto (s) -> (AstPlacement.Goto(s), 0)
   | AstType.Label (s) -> (AstPlacement.Label(s), 0)
 

@@ -73,7 +73,7 @@ and instruction =
   (* return d'une fonction *)
   | Retour of expression
   (* Boucle For *)
-  | For of expression * expression * expression * bloc 
+  | For of instruction * expression * affectable * expression * bloc 
   (* Goto *)
   | Goto of string
   (* Label *)
@@ -136,7 +136,7 @@ struct
     | TantQue of expression * bloc
     | Retour of expression * Tds.info_ast  (* les informations sur la fonction à laquelle est associé le retour *)
     | Empty (* les nœuds ayant disparus: Const *)
-    | For of expression * expression * expression * bloc   
+    | For of instruction * expression * affectable * expression * bloc   
     | Goto of Tds.info_ast
     | Label of Tds.info_ast
 
@@ -199,7 +199,7 @@ type bloc = instruction list
   | TantQue of expression * bloc
   | Retour of expression * Tds.info_ast
   | Empty (* les nœuds ayant disparus: Const *)
-  | For of expression * expression * expression * bloc
+  | For of instruction * expression * affectable * expression * bloc
   | Goto of Tds.info_ast
   | Label of Tds.info_ast
 
@@ -235,7 +235,7 @@ type bloc = instruction list * int (* taille du bloc *)
  | TantQue of expression * bloc
  | Retour of expression * int * int (* taille du retour et taille des paramètres *)
  | Empty (* les nœuds ayant disparus: Const *)
- | For of expression * expression * expression * bloc
+ | For of instruction * expression * affectable * expression * bloc
  | Goto of Tds.info_ast
  | Label of Tds.info_ast
 

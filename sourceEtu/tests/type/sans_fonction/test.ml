@@ -427,7 +427,7 @@ let%test_unit "testBoucle2"=
     let _ = compiler (pathFichiersRat^"testBoucle2.rat")
     in raise ErreurNonDetectee
   with
-  | TypeInattendu (Pointer(Undefined),Int) -> ()
+  | TypeInattendu (Int,Rat) -> ()
 
 let%test_unit "testBoucle3"= 
   let _ = compiler (pathFichiersRat^"testBoucle3.rat") in ()
@@ -437,7 +437,7 @@ let%test_unit "testBoucle4"=
     let _ = compiler (pathFichiersRat^"testBoucle4.rat")
     in raise ErreurNonDetectee
   with
-  | TypeInattendu (Pointer(Undefined),Int) -> ()
+  | TypeBinaireInattendu(Plus, Int, Rat) -> ()
 
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix

@@ -25,6 +25,7 @@ let get_type_info info =
   | InfoConst (_,_) -> Int            (* Si c'est une constante, le type est Int *)
   | InfoVar (_,t,_,_) -> t            (* Si c'est une variable, on renvoie son type *)
   | InfoFun (_,t,_) -> t              (* Si c'est une fonction, on renvoie son type *)
+  | _ -> failwith "Erreur dans le get_type_info"
 
 (*
   [analyse_type_expression : AstType.expression -> typ]
@@ -65,6 +66,7 @@ let rec get_typ_expression e =
                                                                                 | InfoFun (_,t,_) -> if t=Rat then
                                                                                                       Int
                                                                                                   else raise  (TypeInattendu (t,Rat))
+                                                                                | _ -> failwith "Mauvaise info pour ident"
                                                                                 )
                                                           | AstType.Deref (_, t) -> t
                                                           | AstType.TabInd (_, _, t) -> t
@@ -312,17 +314,23 @@ let rec analyse_type_instruction i =
        | _ -> failwith "Erreur dans le retour")
 
   | AstTds.Empty -> AstType.Empty
-  | AstTds.For (e1, e2, e3, b) ->
-      (let ne1 = analyse_type_expression e1 in
+  | AstTds.For (i1, e2, a, e3, b) ->
+      let ne1 = analyse_type_instruction i1 in
+      let te1 = (match ne1 with
+                | AstType.Declaration (info, _) -> (match info_ast_to_info info with
+                                                    | InfoVar (_, t, _, _) -> if t=Int then Int
+                                                                              else raise (TypeInattendu (t, Int))
+                                                    | _ -> failwith "Erreur dans le for")
+                | _ -> failwith "Impossible for"  ) in
        let ne2 = analyse_type_expression e2 in
        let ne3 = analyse_type_expression e3 in
-       let te1 = get_typ_expression ne1 in
        let te2 = get_typ_expression ne2 in
+       let ta, na = analyse_type_affectable a in
        let te3 = get_typ_expression ne3 in
-       match te1, te2, te3 with
-       | Int, Bool, Int ->
+       (match te1, te2, ta, te3 with
+       | Int, Bool, Int, Int ->
            let nb = analyse_type_bloc b in
-           AstType.For (ne1, ne2, ne3, nb)
+           AstType.For (ne1, ne2, na, ne3, nb)
        | _ -> raise (TypeInattendu (te1, Int)))
   | AstTds.Goto (is) -> AstType.Goto (is)
   | AstTds.Label (is) -> AstType.Label (is)

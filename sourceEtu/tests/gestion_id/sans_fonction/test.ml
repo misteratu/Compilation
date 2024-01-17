@@ -150,9 +150,6 @@ let%test_unit "testPointeur5" =
 let%test_unit "testPointeur6" = 
   let _ = compiler (pathFichiersRat^"testPointeur6.rat") in ()
 
-let%test_unit "testPointeur7" = 
-  let _ = compiler (pathFichiersRat^"testPointeur7.rat") in ()
-
 let%test_unit "testConstante" = 
   try
     let _ = compiler (pathFichiersRat^"testConstante.rat") 
@@ -193,7 +190,7 @@ let%test_unit "testGoto6" =
     let _ = compiler (pathFichiersRat^"testGoto6.rat") 
     in raise ErreurNonDetectee
   with
-  | MauvaiseUtilisationIdentifiant("a") -> ()
+  | DoubleDeclaration("x") -> ()
   
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix

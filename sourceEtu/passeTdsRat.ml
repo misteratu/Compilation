@@ -154,19 +154,22 @@ let rec analyse_tds_instruction tds oia i =
                                         | AstSyntax.Binaire (op, _, _) -> if op == AstSyntax.Equ || op == AstSyntax.Inf then
                                           analyse_tds_expression tds e2 else raise (MauvaiseUtilisationIdentifiant "for")
                                         | AstSyntax.Affectable _ -> analyse_tds_expression tds e2
-                                        | _ -> failwith "Mauvaise condirion d'arret") in
+                                        | _ -> failwith "Mauvaise condition d'arret") in
 
-    AstTds.For (ni1, ne2, analyse_tds_affectable tds a "e", analyse_tds_expression tds e3, analyse_tds_bloc tds None b)
+                                        AstTds.For (ni1, ne2, analyse_tds_affectable tds a "e", analyse_tds_expression tds e3, analyse_tds_bloc tds None b)
   | AstSyntax.Goto (n) -> (match chercherGlobalement tds n with
-                              | None -> let info = info_to_info_ast (InfoEtiq(n)) in 
-                                        ajouter tds n info;
+                             | None -> let info = info_to_info_ast (InfoEtiq(n)) in 
+                                        ajouter tds n info; (* L'ajout se fait bien *)
                                         AstTds.Goto (info)
                               | _ -> raise (IdentifiantNonDeclare n))
   | AstSyntax.Label (n) -> (match chercherGlobalement tds n with
-                              | Some ia -> (match info_ast_to_info ia with
-                                            | InfoEtiq _ -> AstTds.Label (ia)
-                                            | _ -> raise (MauvaiseUtilisationIdentifiant n))
-                              | None -> raise (IdentifiantNonDeclare n))
+                            | Some ia ->
+                              (match info_ast_to_info ia with
+                              | InfoEtiq _ -> AstTds.Label (ia)
+                              | _ -> raise (MauvaiseUtilisationIdentifiant n))
+                            | None -> let info = info_to_info_ast (InfoEtiq(n)) in
+                                      ajouter tds n info;
+                                      AstTds.Label (info))
 
 (* analyse_tds_bloc : tds -> info_ast option -> AstSyntax.bloc -> AstTds.bloc *)
 (* Paramètre tds : la table des symboles courante *)

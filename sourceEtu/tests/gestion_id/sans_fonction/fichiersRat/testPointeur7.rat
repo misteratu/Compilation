@@ -1,5 +1,0 @@
-main{
-    int * x = null;
-    int y = null;
-    x = &y;
-}

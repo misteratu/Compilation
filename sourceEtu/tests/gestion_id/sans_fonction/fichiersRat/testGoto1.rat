@@ -3,7 +3,7 @@ main {
     if (a < 5) {
         goto etiq_then;
     } else {
-        goto etiq_else ;
+        goto etiq_else;
     }
     etiq_then :
         print true ;

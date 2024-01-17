@@ -42,6 +42,7 @@ open Ast.AstSyntax
 %token FOR
 %token GOTO
 %token DP
+%token CALL
 
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
@@ -69,7 +70,7 @@ param : t=typ n=ID  {(t,n)}
 bloc : AO li=i* AF      {li}
 
 a :
-| a1=a CO e1=e CF {TabInd(a1, e1)}
+| PO a1=a CO e1=e CF PF {TabInd(a1, e1)}
 | MULT n=a  {Deref n}
 | n=ID      {Ident n}
 
@@ -91,9 +92,11 @@ typ :
 | BOOL    {Bool}
 | INT     {Int}
 | RAT     {Rat}
+| PO t=typ MULT PF   {Pointer t}
 
 e : 
 | n=ID PO lp=separated_list(VIRG,e) PF   {AppelFonction (n,lp)}
+| CALL n=ID PO lp=separated_list(VIRG,e) PF    {AppelFonction (n,lp)}
 | CO e1=e SLASH e2=e CF   {Binaire(Fraction,e1,e2)}
 | n=a                     {Affectable n}
 | TRUE                    {Booleen true}

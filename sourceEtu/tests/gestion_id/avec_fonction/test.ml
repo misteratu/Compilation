@@ -208,6 +208,8 @@ let%test_unit "testPointeur4" =
 let%test_unit "testFuncBoucle1" =
   let _ = compiler (pathFichiersRat^"testFuncBoucle1.rat") in ()
 
+let%test_unit "testTotal" =
+  let _ = compiler (pathFichiersRat^"testTotal.rat") in ()
 
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix

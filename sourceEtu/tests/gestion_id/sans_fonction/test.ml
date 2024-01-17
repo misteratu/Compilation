@@ -174,7 +174,7 @@ let%test_unit "testGoto2" =
     let _ = compiler (pathFichiersRat^"testGoto2.rat") 
     in raise ErreurNonDetectee
   with
-  | MauvaiseUtilisationIdentifiant("a") -> ()
+  | DoubleDeclaration("etiq") -> ()
 
 let%test_unit "testGoto3" = 
   let _ = compiler (pathFichiersRat^"testGoto3.rat") in ()

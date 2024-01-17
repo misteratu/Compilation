@@ -18,6 +18,7 @@ let rec est_compatible t1 t2 =
   | Pointer Undefined, Pointer _ -> true
   | Pointer _, Pointer Undefined -> true
   | Pointer a, Pointer b -> est_compatible a b
+  | Tab a, Tab b -> est_compatible a b
   | _ -> false 
 
 let%test _ = est_compatible Bool Bool

@@ -144,10 +144,10 @@ and analyser_code_instruction i =
                                             jump debut ^
                                             label fin
   | AstPlacement.Goto (is) -> (match info_ast_to_info is with
-                              | InfoEtiq (s) -> jump s
+                              | InfoEtiq (s, _) -> jump s
                               | _ -> failwith "Impossible" )
   | AstPlacement.Label (is) -> (match info_ast_to_info is with
-                              | InfoEtiq (s) -> label s
+                              | InfoEtiq (s, _) -> label s
                               | _ -> failwith "Impossible" )
 
 

@@ -65,7 +65,7 @@ and analyse_tds_expression tds e =
 (* Vérifie la bonne utilisation des identifiants et tranforme l'instruction
 en une instruction de type AstTds.instruction *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let rec analyse_tds_instruction tds oia i =
+let rec analyse_tds_instruction tds maintds oia i =
   match i with
   | AstSyntax.Declaration (t, n, e) ->
       begin
@@ -144,31 +144,33 @@ let rec analyse_tds_instruction tds oia i =
         let ne = analyse_tds_expression tds e in
         AstTds.Retour (ne,ia)
       end
-  | AstSyntax.For (i1, e2, a, e3, b) -> let ni1 = (match i1 with
-                                        | AstSyntax.Declaration _ -> analyse_tds_instruction tds oia i1
+  | AstSyntax.For (i1, e2, a, e3, b) -> let tdsfor = creerTDSFille tds in
+    
+                                        let ni1 = (match i1 with
+                                        | AstSyntax.Declaration _ -> analyse_tds_instruction tdsfor tds oia i1
                                         | _ -> failwith "Mauvaise declaration") in
     
     
                                         let ne2 = (match e2 with
-                                        | AstSyntax.Booleen _ -> analyse_tds_expression tds e2
+                                        | AstSyntax.Booleen _ -> analyse_tds_expression tdsfor e2
                                         | AstSyntax.Binaire (op, _, _) -> if op == AstSyntax.Equ || op == AstSyntax.Inf then
-                                          analyse_tds_expression tds e2 else raise (MauvaiseUtilisationIdentifiant "for")
-                                        | AstSyntax.Affectable _ -> analyse_tds_expression tds e2
+                                          analyse_tds_expression tdsfor e2 else raise (MauvaiseUtilisationIdentifiant "Opération condition for")
+                                        | AstSyntax.Affectable _ -> analyse_tds_expression tdsfor e2
                                         | _ -> failwith "Mauvaise condition d'arret") in
 
-                                        AstTds.For (ni1, ne2, analyse_tds_affectable tds a "e", analyse_tds_expression tds e3, analyse_tds_bloc tds None b)
-  | AstSyntax.Goto (n) -> (match chercherGlobalement tds n with
-                             | None -> let info = info_to_info_ast (InfoEtiq(n)) in 
-                                        ajouter tds n info; (* L'ajout se fait bien *)
-                                        AstTds.Goto (info)
-                              | _ -> raise (IdentifiantNonDeclare n))
-  | AstSyntax.Label (n) -> (match chercherGlobalement tds n with
+                                        AstTds.For (ni1, ne2, analyse_tds_affectable tdsfor a "e", analyse_tds_expression tdsfor e3, analyse_tds_bloc tdsfor None b)
+  | AstSyntax.Goto (n) -> let info = info_to_info_ast (InfoEtiq(n, false)) in 
+                            ajouter tds n info; (* L'ajout se fait bien *)
+                            AstTds.Goto (info)
+                             
+  | AstSyntax.Label (n) -> (match chercherGlobalement maintds n with
                             | Some ia ->
                               (match info_ast_to_info ia with
-                              | InfoEtiq _ -> AstTds.Label (ia)
+                              | InfoEtiq (_, false) -> AstTds.Label (ia)
+                              | InfoEtiq (_, true) -> raise (DoubleDeclaration n)
                               | _ -> raise (MauvaiseUtilisationIdentifiant n))
-                            | None -> let info = info_to_info_ast (InfoEtiq(n)) in
-                                      ajouter tds n info;
+                            | None -> let info = info_to_info_ast (InfoEtiq(n, true)) in
+                                      ajouter maintds n info;
                                       AstTds.Label (info))
 
 (* analyse_tds_bloc : tds -> info_ast option -> AstSyntax.bloc -> AstTds.bloc *)
@@ -184,10 +186,9 @@ and analyse_tds_bloc tds oia li =
   let tdsbloc = creerTDSFille tds in
   (* Analyse des instructions du bloc avec la tds du nouveau bloc.
      Cette tds est modifiée par effet de bord *)
-   let nli = List.map (analyse_tds_instruction tdsbloc oia) li in
+   let nli = List.map (analyse_tds_instruction tdsbloc tds oia) li in
    (* afficher_locale tdsbloc ; *) (* décommenter pour afficher la table locale *)
    nli
-
 
    let analyse_tds_parametre tds (t,n) =
     match chercherLocalement tds n with 
@@ -208,7 +209,7 @@ let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li))  =
   | None -> let infof_ast = (info_to_info_ast(InfoFun(n, t, (List.map(fun (a,_) -> a) lp)))) in
                 ajouter maintds n infof_ast;
                 let lparam = List.map (analyse_tds_parametre filletds) lp in 
-                let convertBloc = List.map (analyse_tds_instruction filletds (Some infof_ast)) li in 
+                let convertBloc = List.map (analyse_tds_instruction filletds maintds (Some infof_ast)) li in 
             AstTds.Fonction(t, infof_ast, lparam,convertBloc)
   | Some _ -> raise (DoubleDeclaration n)
 

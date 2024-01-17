@@ -1,0 +1,25 @@
+(int *) valeur (bool p, (int *) a, (int *) b ){
+    if p {
+        goto a;
+    } else {
+        goto b;
+    }
+    a :
+        return a;
+    b :
+        return b;
+}
+prog {
+    const t = 5;
+    (int *)[] tab = (new (int *)[t]);
+    bool pair = true;
+    int a = 0;
+    int b = 1;
+    for (int i = 0 ; (i < t) ; i = (i+1)){
+    (tab[i]) = call valeur (pair, &a, &b);
+    pair = (pair = false );
+    }
+    for (int i = 0 ; (i < t) ; i = (i+1)){
+        print (*(tab[i ]));
+    }
+}

@@ -32,7 +32,9 @@
         "new",     NEW;
         "null",    NULL;
         "for",     FOR;
-        "goto",    GOTO
+        "goto",    GOTO;
+        "call",    CALL
+
       ];
     fun id ->
       match Hashtbl.find_opt kws id with

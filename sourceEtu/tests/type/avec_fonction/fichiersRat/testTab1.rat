@@ -1,0 +1,5 @@
+test{
+    int [] tab = (new int[10]);
+    (tab[1]) = 8;
+    int [] t2 = {1,2};
+}

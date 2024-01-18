@@ -1,0 +1,3 @@
+test{
+    int [] tab = (new rat[2]);
+}

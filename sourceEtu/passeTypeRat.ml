@@ -92,9 +92,14 @@ let rec get_typ_expression e =
   | AstType.Null -> Pointer (Undefined)
   | AstType.Adresse info -> let t = get_type_info (info_ast_to_info info) in Pointer(t)
   | AstType.NewTab (t,_) -> Tab t
-  | AstType.ListeValeurs (el) -> let tl = List.map get_typ_expression el in
-                                 if est_compatible_list tl tl then Tab (List.hd tl)
-                                 else raise (TypesParametresInattendus (tl,tl))
+  (* Pour tester les valeurs, on regarde le type de la premiere puis on verifie que c'est les meme types ensuite.
+     Le type a la sortie est Tab Undifined si il n'y a pas eu le meme type un moment, Tab type sinon *)
+  | AstType.ListeValeurs (el) ->  let tl = List.map get_typ_expression el in
+                                  let origine = List.hd tl in 
+                                  let res = List.fold_left (fun a b -> if a=b then a else Undefined) origine tl in 
+                                    if res = Undefined then
+                                      Undefined
+                                    else Tab(res)
 
 
 (*
@@ -132,7 +137,7 @@ let rec analyse_type_affectable a =
     (get_type_info (info_ast_to_info ia), AstType.Ident(ia))
   | AstTds.Deref da ->
     (* Analyse de l'affectable *)
-    (* int * x -> Deref -> Ident(Int) *)
+    (* *x -> Pointeur Int -> Int *)
     let (ta, nda) = analyse_type_affectable da in
     (match ta with
       | Pointer(typ) -> (typ, AstType.Deref(nda,typ))
@@ -209,25 +214,6 @@ and analyse_type_expression e =
   | AstTds.NewTab (t, e) -> AstType.NewTab (t, analyse_type_expression e)
   | AstTds.ListeValeurs (el) -> AstType.ListeValeurs (List.map (analyse_type_expression) el)
   
-(*
-  [affectable_to_info : AstTds.affectable -> Info_ast.info option]
-
-  Cette fonction convertit un affectable de type AstTds en une information de type Info_ast.
-
-  Paramètre :
-  - Affectable AstTds à convertir.
-
-  Résultat :
-  - Information de type Info_ast correspondant à l'affectable.
-*)
-
-let rec affectable_to_info a = 
-  match a with
-  | AstTds.Ident(ia) -> 
-      info_ast_to_info ia
-  | AstTds.Deref da -> 
-      affectable_to_info da
-  | _ -> failwith "Erreur dans l'affectable_to_info"
 
 
 (*
@@ -258,8 +244,8 @@ let rec analyse_type_instruction i =
         (* Ajout de la variable à la tds *)
         (modifier_type_variable t n;
          AstType.Declaration (n, ne))
-      else 
-        raise (TypeInattendu (te,t))
+      else (
+        raise (TypeInattendu (te,t)))
 
   | AstTds.Affectation (info,e) ->
       (* Analyse de l'expression *)

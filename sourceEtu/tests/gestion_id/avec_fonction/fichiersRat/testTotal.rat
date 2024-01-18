@@ -16,7 +16,7 @@ prog {
     int a = 0;
     int b = 1;
     for (int i = 0 ; (i < t) ; i = (i+1)){
-    (tab[i]) = call valeur (pair, &a, &b);
+    (tab[i]) = valeur (pair, &a, &b);
     pair = (pair = false );
     }
     for (int i = 0 ; (i < t) ; i = (i+1)){

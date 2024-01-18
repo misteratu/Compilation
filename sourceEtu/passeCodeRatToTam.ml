@@ -131,23 +131,21 @@ and analyser_code_instruction i =
   | AstPlacement.Retour (expr,taille_ret,taille_param) -> analyser_code_expression expr ^ return taille_ret taille_param
   | AstPlacement.Empty -> ""
   | AstPlacement.For (i1, e2, a, e3, b) -> let debut = getEtiquette() in
-                                            let condition = getEtiquette() in
                                             let fin = getEtiquette() in
                                             analyser_code_instruction i1 ^
                                             label debut ^
                                             analyser_code_expression e2 ^
                                             jumpif 0 fin ^
-                                            label condition ^
-                                            analyser_code_affectable a "l" false ^
-                                            analyser_code_expression e3 ^
                                             analyser_code_bloc b ^
+                                            analyser_code_expression e3 ^
+                                            analyser_code_affectable a "e" false ^
                                             jump debut ^
                                             label fin
   | AstPlacement.Goto (is) -> (match info_ast_to_info is with
-                              | InfoEtiq (s, _) -> jump s
+                              | InfoEtiq (_, _, _, etiq) -> jump etiq
                               | _ -> failwith "Impossible" )
   | AstPlacement.Label (is) -> (match info_ast_to_info is with
-                              | InfoEtiq (s, _) -> label s
+                              | InfoEtiq (_, _, _, etiq) -> label etiq
                               | _ -> failwith "Impossible" )
 
 
@@ -162,5 +160,5 @@ let analyser (AstPlacement.Programme(fonctions, prog)) =
   let foncs = String.concat "" (List.map analyser_code_fonction fonctions) in
   let code = ("main \n" ^ analyser_code_bloc prog ^ halt ) in
   let analys = getEntete() ^ foncs ^ code in
-  (* print_endline code; *)
+  print_endline analys;
   analys

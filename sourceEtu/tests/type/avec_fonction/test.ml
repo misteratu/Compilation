@@ -152,6 +152,28 @@ let%test_unit "testFuncBoucle3" =
   with
   | TypeInattendu(Int,Rat) -> ()
 
+let%test_unit "testTab1" =
+  let _ = compiler (pathFichiersRat^"testTab1.rat") in ()
+
+let%test_unit "testTab2" =
+  try
+    let _ = compiler (pathFichiersRat^"testTab2.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Tab(Rat),Tab(Int)) -> ()
+
+let%test_unit "testTab4" =
+  try
+    let _ = compiler (pathFichiersRat^"testTab4.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Undefined,Tab(Tab(Int))) -> ()
+
+let%test_unit "testTab3" =
+  let _ = compiler (pathFichiersRat^"testTab3.rat") in ()
+
+let%test_unit "testTab5" =
+  let _ = compiler (pathFichiersRat^"testTab5.rat") in ()
 
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix

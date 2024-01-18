@@ -191,6 +191,13 @@ let%test_unit "testGoto6" =
     in raise ErreurNonDetectee
   with
   | DoubleDeclaration("x") -> ()
+
+  let%test_unit "testGoto7" = 
+  try
+    let _ = compiler (pathFichiersRat^"testGoto7.rat") 
+    in raise ErreurNonDetectee
+  with
+  | DoubleDeclaration("x") -> ()
   
 (* Fichiers de tests de la génération de code -> doivent passer la TDS *)
 open Unix

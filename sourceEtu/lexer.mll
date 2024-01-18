@@ -13,7 +13,7 @@
   (* on utilise une table pour les mots-clefs de façon à éviter l'ajout *)
   (*  d'états à l'automate résultant *)
   let ident =
-    let kws = Hashtbl.create 16 in
+    let kws = Hashtbl.create 17 in
     List.iter (fun (kw, token) -> Hashtbl.add kws kw token)
       [
         "const",   CONST;
@@ -32,8 +32,7 @@
         "new",     NEW;
         "null",    NULL;
         "for",     FOR;
-        "goto",    GOTO;
-        "call",    CALL
+        "goto",    GOTO
 
       ];
     fun id ->

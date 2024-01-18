@@ -132,3 +132,22 @@ let%expect_test "testBoucle2" =
 let%expect_test "testBoucle3" =
   runtam (pathFichiersRat^"testBoucle3.rat");
   [%expect{| 120 |}]
+
+let%expect_test "testGoto1" =
+  runtam (pathFichiersRat^"testGoto1.rat");
+  [%expect{| true |}]
+
+let%expect_test "testGoto3" =
+  runtam (pathFichiersRat^"testGoto3.rat");
+  [%expect{| 3 |}]
+
+let%expect_test "testGoto4" =
+  runtam (pathFichiersRat^"testGoto4.rat");
+  [%expect{| 76 |}]
+
+let%expect_test "testGoto6" =
+  runtam (pathFichiersRat^"testGoto6.rat");
+  [%expect{| 3 |}]
+
+
+

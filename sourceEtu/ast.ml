@@ -24,7 +24,7 @@ type binaire = Fraction | Plus | Mult | Equ | Inf
 
 (* Affectable apres ajout pointeurs et tableau *)
 type affectable =
-  | TabInd of affectable * expression
+  | TabInd of affectable * expression     (*pointeur vers ID et expression de l'indice*)
   (* Identifiant représenté par son nom *)
   | Ident of string
   (* Dereferencement d'un identifiant *)
@@ -35,7 +35,7 @@ and expression =
   (* Appel de fonction représenté par le nom de la fonction et la liste des paramètres réels *)
   | AppelFonction of string * expression list
   (* Liste des valeurs d'un tableau a la declaration *)
-  | ListeValeurs of expression list
+  | ListeValeurs of expression list   (* Liste des valeurs du tableaux*)
   (* Accès à un affectable représenté par son nom ou affectable *)
   | Affectable of affectable
   (* Booléen *)
@@ -51,7 +51,7 @@ and expression =
   (* Expression de reservation mémoire pour la valeur d'un pointeur *)
   | New of typ
   (* Expression de reservation memoire de tableau *)
-  | NewTab of typ * expression
+  | NewTab of typ * expression (* Type du tableau et expression de taille*)
   (* Adresse d'une variable *)
   | Adresse of string
 
@@ -98,7 +98,7 @@ module AstTds =
 struct
 
   type affectable =
-    | TabInd of affectable * expression
+    | TabInd of affectable * expression  (*pointeur vers ID et expression de l'indice*)
     (* Identifiant représenté par son nom *)
     | Ident of Tds.info_ast
     (* Dereferencement d'un identifiant *)
@@ -111,7 +111,7 @@ struct
   remplacés par les informations associées aux identificateurs *)
   and expression =
     | AppelFonction of Tds.info_ast * expression list
-    | ListeValeurs of expression list
+    | ListeValeurs of expression list (* Liste des valeurs du tableaux*)
     | Affectable of affectable
     | Booleen of bool
     | Entier of int
@@ -119,7 +119,7 @@ struct
     | Binaire of AstSyntax.binaire * expression * expression
     | Null
     | New of typ
-    | NewTab of typ * expression
+    | NewTab of typ * expression (* Type du tableau et expression de taille*)
     | Adresse of Tds.info_ast (*On recupere l'adresse via le deplacement*)
 
 
@@ -164,7 +164,7 @@ type binaire = Fraction | PlusInt | PlusRat | MultInt | MultRat | EquInt | EquBo
 
 (* Affectable apres ajout pointeurs *)
 type affectable =
-  | TabInd of affectable * expression * typ
+  | TabInd of affectable * expression * typ  (*pointeur vers ID, expression de l'indice et type du tableau*)
   (* Identifiant représenté par son nom *)
   | Ident of Tds.info_ast
   (* Dereferencement d'un identifiant *)
@@ -175,14 +175,14 @@ type affectable =
 and expression =
   | AppelFonction of Tds.info_ast * expression list
   | Affectable of affectable
-  | ListeValeurs of expression list
+  | ListeValeurs of expression list (* Liste des valeurs du tableaux*)
   | Booleen of bool
   | Entier of int
   | Unaire of unaire * expression
   | Binaire of binaire * expression * expression
   | Null
   | New of typ
-  | NewTab of typ * expression
+  | NewTab of typ * expression (* Type du tableau et expression de taille *)
   | Adresse of Tds.info_ast
 
 (* instructions existantes Rat *)

@@ -8,7 +8,16 @@ open Code
 type t1 = Ast.AstSyntax.programme
 type t2 = Ast.AstTds.programme
 
+let etiquettes_non_declarees = ref []  
 
+let supprimer_element x liste =
+  List.filter (fun e -> e <> x) liste
+
+let verifier_etiquettes etiquettes =
+  if (List.length etiquettes) > 0 then
+    raise (IdentifiantNonDeclare (List.hd etiquettes))
+  else
+    ()
 
 let rec affectable_info a = 
   match a with 
@@ -163,19 +172,21 @@ let rec analyse_tds_instruction tds tdsGOTO maintds oia i =
   | AstSyntax.Goto (n) ->  (match chercherGlobalement tdsGOTO n with
                             | Some ia ->
                               (match info_ast_to_info ia with
-                              | InfoEtiq (_, false, _, nomGOTO) -> AstTds.Goto (info_to_info_ast (InfoEtiq(n, true, true, nomGOTO)))
+                              | InfoEtiq (_, false, nomGOTO) -> AstTds.Goto (info_to_info_ast (InfoEtiq(n, true, nomGOTO)))
                               | _ -> raise (MauvaiseUtilisationIdentifiant n))
-                            | None -> let info = info_to_info_ast (InfoEtiq(n, false, false, getEtiquette())) in
+                            | None -> let info = info_to_info_ast (InfoEtiq(n, false, getEtiquette())) in
+                                      etiquettes_non_declarees := n :: !etiquettes_non_declarees;
                                       ajouter tdsGOTO n info;
                                       AstTds.Goto (info))
                              
   | AstSyntax.Label (n) -> (match chercherGlobalement tdsGOTO n with
-                            | Some ia ->
+                            | Some ia -> if (List.mem n !etiquettes_non_declarees) then
+                              etiquettes_non_declarees := supprimer_element n !etiquettes_non_declarees;
                               (match info_ast_to_info ia with
-                              | InfoEtiq (_, false, _, nomGOTO) -> AstTds.Label (info_to_info_ast (InfoEtiq(n, false, true, nomGOTO)))
-                              | InfoEtiq (_, true, _, _) -> raise (DoubleDeclaration n)
+                              | InfoEtiq (_, false, nomGOTO) -> AstTds.Label (info_to_info_ast (InfoEtiq(n, false, nomGOTO)))
+                              | InfoEtiq (_, true, _) -> raise (DoubleDeclaration n)
                               | _ -> raise (MauvaiseUtilisationIdentifiant n))
-                            | None -> let info = info_to_info_ast (InfoEtiq(n, true, true, getEtiquette())) in
+                            | None -> let info = info_to_info_ast (InfoEtiq(n, true, getEtiquette())) in
                                       ajouter tdsGOTO n info;
                                       AstTds.Label (info))
 
@@ -226,8 +237,10 @@ let analyse_tds_fonction maintds tdsGOTO (AstSyntax.Fonction(t,n,lp,li))  =
 en un programme de type AstTds.programme *)
 (* Erreur si mauvaise utilisation des identifiants *)
 let analyser (AstSyntax.Programme (fonctions,prog)) =
+  etiquettes_non_declarees := [];
   let tds = creerTDSMere () in
   let tdsGOTO = creerTDSMere () in
   let nf = List.map (analyse_tds_fonction tds tdsGOTO) fonctions in
   let nb = analyse_tds_bloc tds tdsGOTO None prog in
+  verifier_etiquettes !etiquettes_non_declarees;
   AstTds.Programme (nf,nb)

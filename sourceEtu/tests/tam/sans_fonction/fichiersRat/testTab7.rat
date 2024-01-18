@@ -1,0 +1,5 @@
+test{
+    rat [] tab = (new rat [10]);
+    (tab[5]) = [10/3];
+    print (tab[5]);
+}

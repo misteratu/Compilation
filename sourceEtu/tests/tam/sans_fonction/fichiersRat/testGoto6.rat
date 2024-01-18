@@ -6,7 +6,7 @@ if (a < 5) {
     goto fin;
 }
 suite :
-int x = (a + 4);
+    int x = (a + 4);
 fin :
-print x;
+    print x;
 }

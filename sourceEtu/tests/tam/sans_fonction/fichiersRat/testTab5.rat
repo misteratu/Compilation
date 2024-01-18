@@ -1,0 +1,5 @@
+test{
+    int [] tab = {5,9};
+    int x = (tab[1]);
+    print x;
+}

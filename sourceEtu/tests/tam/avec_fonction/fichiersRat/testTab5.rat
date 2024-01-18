@@ -1,0 +1,8 @@
+int [] caca(int [][] x) {
+    return (x[1]);
+}
+
+main {
+    int [][] prank = (new int[][10]);
+    int [] issou = caca(prank);
+}

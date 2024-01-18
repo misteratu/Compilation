@@ -147,7 +147,49 @@ let%expect_test "testGoto4" =
 
 let%expect_test "testGoto6" =
   runtam (pathFichiersRat^"testGoto6.rat");
+  [%expect{| 0 |}]
+
+let%expect_test "testTab1" =
+  runtam (pathFichiersRat^"testTab1.rat");
+  [%expect{| 8 |}]
+
+let%expect_test "testTab2" =
+  runtam (pathFichiersRat^"testTab2.rat");
+  [%expect{| 8 |}]
+
+let%expect_test "testTab3" =
+  runtam (pathFichiersRat^"testTab3.rat");
+  [%expect{| 5 |}]
+
+let%expect_test "testTab4" =
+  runtam (pathFichiersRat^"testTab4.rat");
+  [%expect{| 9 |}]
+
+let%expect_test "testTab5" =
+  runtam (pathFichiersRat^"testTab5.rat");
+  [%expect{| 9 |}]
+
+let%expect_test "testTab6" =
+  runtam (pathFichiersRat^"testTab6.rat");
+  [%expect{| 99 |}]
+
+let%expect_test "testTab7" =
+  runtam (pathFichiersRat^"testTab7.rat");
+  [%expect{| [10/3] |}]
+
+let%expect_test "testTab8" =
+  runtam (pathFichiersRat^"testTab8.rat");
   [%expect{| 3 |}]
 
+let%expect_test "testTabPointer1" =
+  runtam (pathFichiersRat^"testTabPointer1.rat");
+  [%expect{| 3 |}]
 
+let%expect_test "testTabPointer2" =
+  runtam (pathFichiersRat^"testTabPointer2.rat");
+  [%expect{| 1012 |}]
+
+let%expect_test "testTabPointer3" =
+  runtam (pathFichiersRat^"testTabPointer3.rat");
+  [%expect{| 3 |}]
 

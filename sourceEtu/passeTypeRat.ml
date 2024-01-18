@@ -94,7 +94,7 @@ let rec get_typ_expression e =
   | AstType.NewTab (t,_) -> Tab t
   (* Pour tester les valeurs, on regarde le type de la premiere puis on verifie que c'est les meme types ensuite.
      Le type a la sortie est Tab Undifined si il n'y a pas eu le meme type un moment, Tab type sinon *)
-  | AstType.ListeValeurs (el) ->  let tl = List.map get_typ_expression el in
+  | AstType.ListeValeurs (el,_) ->  let tl = List.map get_typ_expression el in
                                   let origine = List.hd tl in 
                                   let res = List.fold_left (fun a b -> if a=b then a else Undefined) origine tl in 
                                     if res = Undefined then
@@ -212,7 +212,9 @@ and analyse_type_expression e =
   | AstTds.New t -> AstType.New t
   | AstTds.Adresse (info) -> AstType.Adresse (info)
   | AstTds.NewTab (t, e) -> AstType.NewTab (t, analyse_type_expression e)
-  | AstTds.ListeValeurs (el) -> AstType.ListeValeurs (List.map (analyse_type_expression) el)
+  | AstTds.ListeValeurs (el) -> let res = List.map (analyse_type_expression) el in
+                                let t = get_typ_expression (List.hd res) in
+                                  AstType.ListeValeurs (res,t)
   
 
 

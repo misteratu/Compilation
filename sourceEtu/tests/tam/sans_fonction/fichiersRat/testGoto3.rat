@@ -8,5 +8,6 @@ if (a < 5) {
 suite :
 int x = (a + 4);
 fin :
-print x;
+int z = 3;
+print z;
 }

@@ -1,0 +1,5 @@
+test{
+    int [] row2 = {3, 4};
+    int [] * jeremy = &row2;
+    print (*jeremy[0]);
+}

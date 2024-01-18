@@ -10,7 +10,7 @@ type info =
   (* Information associée à une fonction : son nom (utile pour l'appel), son type de retour et la liste des types des paramètres *)
   | InfoFun of string * typ * typ list
   (* Information associée à une étiquette : son nom (utile pour l'appel), si l'étiquette existe et son nom TAM *)
-  | InfoEtiq of string * bool * bool * string
+  | InfoEtiq of string * bool * string
 
 (* Table des symboles *)
 type tds 

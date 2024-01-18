@@ -1,0 +1,5 @@
+test{
+    int [] tab = (new int [10]);
+    (tab[5]) = 99;
+    print (tab[5]);
+}

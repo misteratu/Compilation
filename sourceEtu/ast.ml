@@ -175,7 +175,7 @@ type affectable =
 and expression =
   | AppelFonction of Tds.info_ast * expression list
   | Affectable of affectable
-  | ListeValeurs of expression list (* Liste des valeurs du tableaux*)
+  | ListeValeurs of expression list * typ (* Liste des valeurs du tableaux et le type des elems *)
   | Booleen of bool
   | Entier of int
   | Unaire of unaire * expression

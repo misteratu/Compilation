@@ -1,0 +1,7 @@
+test{
+    int [] row1 = {1, 2};
+    int [] row2 = {3, 4};
+    int [] * [] tab = {&row1, &row2};
+    print (*(tab[1])[0]);
+
+}

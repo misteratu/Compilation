@@ -1,13 +1,15 @@
 main {
-const a = 40;
-if (a < 5) {
-    goto suite;
-} else {
-    goto fin;
-}
-suite :
-int x = (a + 4);
+int i = 3 ;
+goto etiq ;
+while (i < 10) {
+    int x = 5 ;
+    print x ;
+    etiq :
+        int a = 7;
+        print a;
+        goto fin;
+    }
 fin :
-int z = 3;
-print z;
+    int j = 6;
+    print j;
 }

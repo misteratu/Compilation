@@ -1,0 +1,4 @@
+test{
+    int [] tab = {8};
+    print (tab[0]);
+}

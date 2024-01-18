@@ -1,0 +1,9 @@
+test{
+    int x = 10;
+    int y = 12;
+    (int *) [] tab = (new (int *)[2]);
+    (tab[0]) = &x;
+    (tab[1]) = &y;
+    print *(tab[0]);
+    print *(tab[1]);    
+}

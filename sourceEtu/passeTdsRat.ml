@@ -8,22 +8,26 @@ open Code
 type t1 = Ast.AstSyntax.programme
 type t2 = Ast.AstTds.programme
 
+(* liste globale des etiques seulement utilisées dans un GOTO *)
 let etiquettes_non_declarees = ref []  
 
 let supprimer_element x liste =
   List.filter (fun e -> e <> x) liste
 
+(* Fonction vérifiant la présence d'un ou plusieurs GOTO sans label -> si présence alors on déclare une exception *)
 let verifier_etiquettes etiquettes =
   if (List.length etiquettes) > 0 then
     raise (IdentifiantNonDeclare (List.hd etiquettes))
   else
     ()
 
+(* Fonction permettant de récupérer directement l'info associé à un affectable *)
 let rec affectable_info a = 
   match a with 
   | AstTds.Ident ia -> ia
   | AstTds.Deref ia -> affectable_info ia
   | AstTds.TabInd (ia, _) -> affectable_info ia
+
 (* Renvoie une info ast correspondante a l'affectable, erreur sinon *)
 (* modif prend "l" pour lecture et "e" pour ecriture*)
 let rec analyse_tds_affectable tds a modif =
@@ -32,8 +36,11 @@ let rec analyse_tds_affectable tds a modif =
   | AstSyntax.Ident n -> (match chercherGlobalement tds n with
                           | Some ia -> (match info_ast_to_info ia with
                                         | InfoVar(_,_,_,_) -> AstTds.Ident(ia)
-                                        | InfoConst(_,_) -> if (modif == "l") then
-                                          Ident(ia) else raise (MauvaiseUtilisationIdentifiant n)
+                                        | InfoConst(_,_) -> (* On check ici qu'on ne cherche pas à modifier la valeur d'une constante *)
+                                          if (modif == "l") then
+                                            Ident(ia)
+                                          else 
+                                            raise (MauvaiseUtilisationIdentifiant n)
                                         | _ -> raise (MauvaiseUtilisationIdentifiant n))
                           | None -> raise (IdentifiantNonDeclare n))
   | AstSyntax.Deref a -> AstTds.Deref (analyse_tds_affectable tds a modif)
@@ -48,9 +55,10 @@ and analyse_tds_expression tds e =
   match e with 
   | AstSyntax.AppelFonction(nom, el) -> (match chercherGlobalement tds nom with 
                                           | None -> raise (IdentifiantNonDeclare nom)
-                                          | Some info -> (match info_ast_to_info info with
-                                                                          | InfoFun (_,_,_) ->AstTds.AppelFonction(info, List.map (analyse_tds_expression tds) el)
-                                                                          | _ -> raise (MauvaiseUtilisationIdentifiant nom))
+                                          | Some info -> 
+                                            (match info_ast_to_info info with
+                                            | InfoFun (_,_,_) ->AstTds.AppelFonction(info, List.map (analyse_tds_expression tds) el)
+                                            | _ -> raise (MauvaiseUtilisationIdentifiant nom))
                                         )
   | AstSyntax.Affectable a -> let res = analyse_tds_affectable tds a "l" in AstTds.Affectable res
   | AstSyntax.Booleen (b) -> AstTds.Booleen (b)

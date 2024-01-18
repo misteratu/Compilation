@@ -90,7 +90,7 @@ let rec get_typ_expression e =
                                       | _ -> failwith "Non InfoFun pour fonction")
   | AstType.New t -> Pointer t
   | AstType.Null -> Pointer (Undefined)
-  | AstType.Adresse info -> let t = get_type_info (info_ast_to_info info) in Pointer(t)
+  | AstType.Adresse info -> let t = get_type_info (info_ast_to_info info) in Pointer(t) (* On récupère le type de l'id et on rajoute une couche de pointeur *)
   | AstType.NewTab (t,_) -> Tab t
   (* Pour tester les valeurs, on regarde le type de la premiere puis on verifie que c'est les meme types ensuite.
      Le type a la sortie est Tab Undifined si il n'y a pas eu le meme type un moment, Tab type sinon *)

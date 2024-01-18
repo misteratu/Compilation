@@ -89,7 +89,13 @@ and analyser_code_expression e =
   | AstType.Adresse(infoa) -> (match info_ast_to_info infoa with
                                 | InfoVar(_,_,d,reg) -> loada  d reg
                                 | _ -> failwith "Impossible")
-  | AstType.ListeValeurs(l) -> String.concat "" (List.map analyser_code_expression l)
+  | AstType.ListeValeurs(l) ->  push 1 ^          (* On reserve l'adresse du tableau qui sera le resultat *)
+                                String.concat "" (List.map analyser_code_expression ) ^
+                                loadl_int (List.length l) ^ loadl_int (getTaille (List.hd l)) ^ subr "IMul" ^ (* Nombre de cases a reserver dans le tas = nbElem*tailleElem *)
+                                subr "MAlloc" ^
+                                store 1 (-(List.length l)-2) "ST" ^
+                                load 1 (-(List.length l)-1) "ST" ^
+                                storei (List.length l)
   | AstType.NewTab(t, e) -> let res = analyser_code_expression e in
                             res ^ loadl_int (getTaille t) ^ subr "IMul" ^ subr "MAlloc"
 
